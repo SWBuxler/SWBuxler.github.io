@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Story intro — lives at the top of index.html, above the site itself.
+   Loaded after site.css and reuses its tokens, .wrap, .btn and .todo.
+   All classes are .st- prefixed so nothing collides with the main site.
+
+   Alignment rule: the story uses the SAME centered 68ch column as the rest
+   of the page, so scrolling out of the intro doesn't shift the text.
+   ========================================================================== */
+
+:root{
+  --st-h:118; --st-s:30%; --st-l:68%;        /* driven by scroll, see story.js */
+  --st:hsl(var(--st-h) var(--st-s) var(--st-l));
+  --st-faint:hsl(var(--st-h) var(--st-s) var(--st-l) / .16);
+}
+
+body.story{overflow-x:hidden}
+
+/* ---------- fixed background ---------- */
+#stream{position:fixed;inset:0;z-index:0;pointer-events:none;display:block;
+  transition:opacity .25s linear}
+.st-vig{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(125% 85% at 50% 45%,transparent 42%,rgba(11,13,10,.80) 100%);
+  transition:opacity .25s linear}
+
+/* ---------- header: hidden during the intro, slides in with the site ------ */
+body.story .site-head{position:fixed;top:var(--winbar);left:0;right:0;
+  transform:translateY(-101%);transition:transform .45s cubic-bezier(.2,.8,.3,1)}
+body.story .site-head.show{transform:none}
+
+/* ---------- skip ---------- */
+.st-skip{position:fixed;top:var(--winbar);right:0;z-index:60;
+  display:flex;align-items:center;gap:.45rem;
+  padding:.5rem .85rem;font-size:.76rem;text-decoration:none;
+  color:var(--text-mute);background:rgba(11,13,10,.9);
+  border-left:1px dashed var(--rule);border-bottom:1px dashed var(--rule);
+  backdrop-filter:blur(6px);transition:opacity .3s,color .2s}
+.st-skip::after{content:"↓";color:var(--st)}
+.st-skip:hover{color:var(--text-bright)}
+.st-skip.gone{opacity:0;pointer-events:none}
+
+/* ---------- beats ---------- */
+.st-story{position:relative;z-index:5}
+.st-beat{min-height:66svh;display:flex;align-items:center;padding:2.6rem 0}
+.st-beat+.st-beat{border-top:1px dashed var(--rule)}
+.st-inner{width:100%;max-width:68ch;margin:0 auto;padding:0 var(--gutter)}
+
+.st-tag{font-size:.74rem;color:var(--text-mute);margin:0 0 .9rem;
+  display:flex;align-items:center;gap:.5rem}
+.st-tag::before{content:"$";color:var(--st);flex:none}
+
+.st-beat h2{font-size:clamp(1.45rem,3.6vw,2.2rem);line-height:1.22;letter-spacing:-.02em;
+  font-weight:700;color:var(--text-bright);margin:0 0 1rem;text-wrap:balance}
+.st-w{display:inline-block;overflow:hidden;vertical-align:bottom}
+.st-w b{display:inline-block;font-weight:inherit}
+
+.st-lede{font-size:.94rem;line-height:1.75;color:var(--text);margin:0 0 1.1rem;max-width:none}
+.st-lede em,.st-close em{color:var(--text-bright);font-style:normal;
+  text-decoration:underline;text-decoration-color:var(--st-faint);text-underline-offset:4px}
+.st-close{font-size:.88rem;line-height:1.7;color:var(--text-mute);margin:1rem 0 0;max-width:none}
+
+/* staged reveal — gated on .js so no-JS shows everything */
+.js .st-beat h2 .st-w b,.js .st-rv{opacity:0;transform:translateY(.7em)}
+.js .st-beat.on h2 .st-w b,.js .st-beat.on .st-rv{opacity:1;transform:none;
+  transition:opacity .55s cubic-bezier(.2,.8,.3,1),transform .55s cubic-bezier(.2,.8,.3,1)}
+.js .st-beat.on .st-rv{transition-delay:.22s}
+.js .st-beat.on .st-rv--2{transition-delay:.32s}
+
+/* ---------- chips ---------- */
+.st-chips{display:flex;flex-wrap:wrap;gap:.4rem .8rem;margin-top:.2rem}
+.st-chip{font-size:.74rem;color:var(--text-mute)}
+.st-chip::before{content:"[";color:var(--text-dim)}
+.st-chip::after{content:"]";color:var(--text-dim)}
+.st-chip--ph{color:var(--text-dim)}
+
+/* ---------- two-column block: shared by beats 3 and 5 -------------------- */
+.st-cols{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.5rem}
+.st-col{border:1px dashed var(--rule);padding:.75rem .85rem;background:rgba(16,19,14,.72)}
+.st-col h3{margin:0 0 .55rem;font-size:.78rem;font-weight:700;color:var(--text-bright)}
+.st-col h3 span{display:block;font-size:.68rem;font-weight:400;color:var(--text-dim);
+  margin-top:.1rem;font-variant-numeric:tabular-nums}
+.st-col ul{list-style:none;margin:0;padding:0}
+.st-col li{font-size:.78rem;line-height:1.6;color:var(--text-mute);
+  margin-bottom:.55rem;padding-left:.95rem;position:relative;max-width:none}
+.st-col li:last-child{margin-bottom:0}
+.st-col li::before{content:"·";position:absolute;left:.25rem;opacity:.75}
+.st-col li b{display:block;color:var(--text);font-weight:700}
+@media (max-width:44rem){.st-cols{grid-template-columns:1fr}}
+
+/* beat 5 is the only place both accent colors appear at once — the palette
+   makes the "both worlds" claim before the copy does */
+.st-col--hand{border-left:2px solid var(--text)}
+.st-col--ai{border-left:2px solid var(--amber)}
+.st-col--hand h3{color:var(--text)}
+.st-col--ai h3{color:var(--amber)}
+.st-col--hand li::before{color:var(--text)}
+.st-col--ai li::before{color:var(--amber)}
+
+/* ---------- rupture ---------- */
+#b4 h2{font-size:clamp(1.65rem,4.6vw,2.7rem)}
+.st-strike{position:relative;display:inline-block}
+.st-strike::after{content:"";position:absolute;left:-2%;right:-2%;top:57%;height:2px;
+  background:var(--st);transform:scaleX(0);transform-origin:left;
+  transition:transform .7s cubic-bezier(.65,0,.35,1) .45s}
+.st-beat.on .st-strike::after{transform:scaleX(1)}
+
+/* ---------- handoff into the site ---------- */
+.st-handoff{position:relative;z-index:5;display:flex;flex-direction:column;
+  align-items:center;gap:.5rem;padding:2rem 0 3.2rem;
+  font-size:.72rem;color:var(--text-dim)}
+.st-handoff i{display:block;width:1px;height:2.6rem;
+  background:linear-gradient(var(--rule-firm),transparent)}
+#site{scroll-margin-top:calc(var(--winbar) + 3.2rem)}
+
+/* ---------- scroll hint ---------- */
+.st-hint{position:absolute;left:50%;transform:translateX(-50%);bottom:1.2rem;
+  font-size:.68rem;color:var(--text-dim);display:flex;align-items:center;gap:.5rem}
+.st-hint i{display:block;width:1px;height:1.2rem;
+  background:linear-gradient(var(--st),transparent);
+  animation:st-drop 1.9s ease-in-out infinite}
+@keyframes st-drop{0%,100%{opacity:.25;transform:scaleY(.4);transform-origin:top}
+                   50%{opacity:1;transform:scaleY(1);transform-origin:top}}
+
+@media (prefers-reduced-motion:reduce){
+  .js .st-beat h2 .st-w b,.js .st-rv{opacity:1!important;transform:none!important}
+  .st-strike::after{transform:scaleX(1)!important}
+}
+
+@media print{
+  #stream,.st-vig,.st-hint,.st-skip,.st-handoff{display:none}
+  body.story .site-head{display:none}
+  .st-beat{min-height:0;padding:0 0 1.2rem;break-inside:avoid;border:0}
+}

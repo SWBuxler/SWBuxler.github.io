@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eight Beats</title>
+<style>
+/* ==================================================================
+   STORY SCROLLER — eight beats, one continuous scroll.
+   The background stream carries the narrative: sparse + warm while the
+   work is hand-built, stalled + grey at the rupture, dense + cool after.
+   Committed dark theme; every color painted explicitly.
+   ================================================================== */
+:root{
+  --h:35; --s:72%;                       /* driven by scroll, see JS */
+  --accent:hsl(var(--h) var(--s) 58%);
+  --accent-dim:hsl(var(--h) var(--s) 58% / .16);
+  --ground:#08090c; --text:#e9edf3; --soft:#8d98a8; --mute:#5d6675;
+  --line:#1a1f28; --line-2:#28303c;
+  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--ground);color:var(--text);font-family:var(--ui);
+     font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ---------- fixed stream background ---------- */
+#stream{position:fixed;inset:0;z-index:0;pointer-events:none;display:block}
+.vig{position:fixed;inset:0;z-index:1;pointer-events:none;
+     background:radial-gradient(120% 80% at 50% 40%,transparent 35%,rgba(8,9,12,.82) 100%)}
+
+/* ---------- progress rail ---------- */
+.rail{position:fixed;left:2rem;top:50%;transform:translateY(-50%);z-index:20;
+      display:flex;flex-direction:column;gap:.9rem}
+.rail a{display:flex;align-items:center;gap:.65rem;text-decoration:none;
+        font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+        color:var(--mute);transition:color .3s}
+.rail i{display:block;width:22px;height:1.5px;background:var(--line-2);flex:none;
+        transition:width .35s cubic-bezier(.2,.8,.3,1),background .35s}
+.rail a span{opacity:0;transform:translateX(-4px);transition:opacity .3s,transform .3s;
+             white-space:nowrap}
+.rail a:hover span,.rail a.on span{opacity:1;transform:none}
+.rail a:hover{color:var(--soft)}
+.rail a.on{color:var(--accent)}
+.rail a.on i{width:40px;background:var(--accent)}
+.rail a.done i{background:var(--line-2)}
+@media (max-width:60rem){.rail{left:.9rem;gap:.7rem}.rail a span{display:none}}
+@media (max-width:34rem){.rail{display:none}}
+
+/* ---------- beats ---------- */
+main{position:relative;z-index:5}
+.beat{min-height:100svh;display:flex;align-items:center;
+      padding:5rem 2rem 5rem 8.5rem;position:relative}
+@media (max-width:60rem){.beat{padding:4.5rem 1.5rem 4.5rem 4rem}}
+@media (max-width:34rem){.beat{padding:4rem 1.25rem}}
+.inner{width:100%;max-width:46rem}
+.inner--wide{max-width:56rem}
+.inner--mid{max-width:40rem;margin:0 auto;text-align:center}
+
+.tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+     color:var(--accent);margin:0 0 1.4rem;display:flex;align-items:center;gap:.7rem}
+.tag::before{content:"";width:1.6rem;height:1px;background:var(--accent)}
+.inner--mid .tag{justify-content:center}
+.inner--mid .tag::before{display:none}
+
+h2{font-size:clamp(2.1rem,6vw,4.1rem);line-height:1.02;letter-spacing:-.035em;
+   font-weight:670;margin:0 0 1.5rem;text-wrap:balance}
+h2 .w{display:inline-block;overflow:hidden;vertical-align:bottom}
+h2 .w b{display:inline-block;font-weight:inherit}
+.lede{font-size:clamp(1rem,2vw,1.2rem);color:var(--soft);max-width:34rem;margin:0 0 1.6rem}
+.inner--mid .lede{margin-left:auto;margin-right:auto}
+.lede em{color:var(--text);font-style:normal}
+
+/* staged reveal — only under .js, so no-JS shows everything */
+.js h2 .w b,.js .rv{opacity:0;transform:translateY(1.1em)}
+.js .beat.on h2 .w b,.js .beat.on .rv{opacity:1;transform:none;
+  transition:opacity .7s cubic-bezier(.2,.8,.3,1),transform .7s cubic-bezier(.2,.8,.3,1)}
+.js .beat.on .rv{transition-delay:.28s}
+.js .beat.on .rv--2{transition-delay:.4s}
+.js .beat.on .rv--3{transition-delay:.52s}
+
+/* ---------- chips (example slots) ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.4rem}
+.chip{font-family:var(--mono);font-size:.72rem;letter-spacing:.03em;color:var(--soft);
+      border:1px solid var(--line-2);border-radius:6px;padding:.3rem .6rem;background:rgba(18,22,29,.7)}
+.chip--ph{color:var(--mute);border-style:dashed}
+.chip b{color:var(--accent);font-weight:500}
+
+/* ---------- year marker ---------- */
+.year{font-family:var(--mono);font-size:.8rem;letter-spacing:.14em;color:var(--mute);
+      margin:0 0 1rem;font-variant-numeric:tabular-nums}
+.year b{color:var(--accent);font-weight:500}
+
+/* ---------- skills matrix (beat 3) ---------- */
+.mx{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem;margin-top:.4rem}
+.mx div{border:1px solid var(--line);border-radius:8px;padding:.7rem .8rem;
+        background:rgba(15,18,24,.72)}
+.mx h3{margin:0 0 .25rem;font-size:.82rem;font-weight:620;color:var(--text)}
+.mx p{margin:0;font-family:var(--mono);font-size:.68rem;color:var(--mute);line-height:1.5}
+
+/* ---------- rupture (beat 5) ---------- */
+#b5 h2{font-size:clamp(2.4rem,8vw,5.4rem);letter-spacing:-.045em}
+.strike{position:relative;display:inline-block}
+.strike::after{content:"";position:absolute;left:-2%;right:-2%;top:56%;height:2px;
+  background:var(--accent);transform:scaleX(0);transform-origin:left;
+  transition:transform .8s cubic-bezier(.65,0,.35,1) .55s}
+.beat.on .strike::after{transform:scaleX(1)}
+
+/* ---------- before / after (beat 7) ---------- */
+.ba{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin-top:.6rem}
+.ba__c{border:1px solid var(--line);border-radius:9px;padding:.9rem 1rem;background:rgba(15,18,24,.72)}
+.ba__c h3{margin:0 0 .5rem;font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;
+          text-transform:uppercase;color:var(--mute);font-weight:400}
+.ba__c p{margin:0;font-size:.92rem;color:var(--soft)}
+.ba__c--now{border-color:var(--accent-dim);box-shadow:0 0 0 1px var(--accent-dim)}
+.ba__c--now p{color:var(--text)}
+.ba__x{font-family:var(--mono);font-size:1.5rem;color:var(--accent);font-weight:600}
+@media (max-width:40rem){.ba{grid-template-columns:1fr}.ba__x{text-align:center}}
+
+/* ---------- CTA (beat 8) ---------- */
+.cta{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.5rem}
+.inner--mid .cta{justify-content:center}
+.btn{display:inline-flex;align-items:center;gap:.45rem;text-decoration:none;
+     font-size:.92rem;font-weight:560;border-radius:9px;padding:.62rem 1.15rem;
+     border:1px solid var(--line-2);color:var(--text);background:rgba(18,22,29,.8);
+     transition:border-color .25s,color .25s,transform .25s}
+.btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+.btn--p{background:var(--accent);border-color:var(--accent);color:#07110f;font-weight:640}
+.btn--p:hover{color:#07110f;filter:brightness(1.08)}
+
+/* ---------- scroll hint ---------- */
+.hint{position:absolute;left:8.5rem;bottom:2.2rem;font-family:var(--mono);font-size:.64rem;
+      letter-spacing:.16em;text-transform:uppercase;color:var(--mute);
+      display:flex;align-items:center;gap:.6rem}
+.hint i{display:block;width:1px;height:1.6rem;background:linear-gradient(var(--accent),transparent);
+        animation:drop 1.9s ease-in-out infinite}
+@keyframes drop{0%,100%{opacity:.25;transform:scaleY(.4);transform-origin:top}
+                50%{opacity:1;transform:scaleY(1);transform-origin:top}}
+@media (max-width:60rem){.hint{left:4rem}}
+@media (max-width:34rem){.hint{left:1.25rem}}
+
+/* ---------- demo banner ---------- */
+.banner{position:fixed;top:0;left:0;right:0;z-index:40;background:rgba(8,9,12,.9);
+        border-bottom:1px solid var(--line);backdrop-filter:blur(8px);
+        font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;color:var(--mute);
+        padding:.5rem 1rem;display:flex;gap:1rem;align-items:center;justify-content:center;
+        flex-wrap:wrap;text-align:center}
+.banner b{color:var(--accent);font-weight:500}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition-duration:.01ms!important}
+  .js h2 .w b,.js .rv{opacity:1!important;transform:none!important}
+  .strike::after{transform:scaleX(1)!important}
+}
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <span>Demo · story structure and motion only</span>
+  <span><b>[ bracketed ]</b> text is waiting on Seth</span>
+</div>
+
+<canvas id="stream" aria-hidden="true"></canvas>
+<div class="vig" aria-hidden="true"></div>
+
+<nav class="rail" aria-label="Story progress">
+  <a href="#b1"><i></i><span>Self-taught</span></a>
+  <a href="#b2"><i></i><span>First job</span></a>
+  <a href="#b3"><i></i><span>Range</span></a>
+  <a href="#b4"><i></i><span>Scale</span></a>
+  <a href="#b5"><i></i><span>The question</span></a>
+  <a href="#b6"><i></i><span>Leverage</span></a>
+  <a href="#b7"><i></i><span>Judgment</span></a>
+  <a href="#b8"><i></i><span>Next</span></a>
+</nav>
+
+<main>
+
+  <!-- ========== 1 · SELF-TAUGHT ========== -->
+  <section class="beat" id="b1">
+    <div class="inner">
+      <p class="tag">Seth Hartzler · Software Engineer</p>
+      <h2 data-split>Nobody assigned me this.</h2>
+      <p class="lede rv">I started writing code in junior high because it was the most interesting
+        thing I could find to do. It stayed a hobby for years before it was ever a job —
+        <em>which is the only reason I got good at it.</em></p>
+      <div class="chips rv rv--2">
+        <span class="chip">Junior high — high school</span>
+        <span class="chip chip--ph">[ first language ]</span>
+        <span class="chip chip--ph">[ first thing that actually worked ]</span>
+      </div>
+    </div>
+    <div class="hint"><i></i>Scroll</div>
+  </section>
+
+  <!-- ========== 2 · FIRST JOB ========== -->
+  <section class="beat" id="b2">
+    <div class="inner">
+      <p class="tag">Beat 02 · The hobby became a job</p>
+      <p class="year rv">Senior year of high school · <b>2021</b></p>
+      <h2 data-split>I was shipping production code before I could vote.</h2>
+      <p class="lede rv rv--2">A company hired me to write software while I was still in high
+        school. Not a shadowing program, not a summer thing — real work, on a real product,
+        with people depending on it.</p>
+      <div class="chips rv rv--3">
+        <span class="chip chip--ph">[ what you built first ]</span>
+        <span class="chip chip--ph">[ who used it ]</span>
+        <span class="chip chip--ph">[ what broke, and what you learned ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 3 · RANGE ========== -->
+  <section class="beat" id="b3">
+    <div class="inner inner--wide">
+      <p class="tag">Beat 03 · Solinftec · 2021 — 2023</p>
+      <h2 data-split>Two years learning the whole stack.</h2>
+      <p class="lede rv">Agriculture technology — autonomous equipment and crop intelligence.
+        I got to work across the entire thing rather than being handed one narrow slice.</p>
+      <div class="mx rv rv--2">
+        <div><h3>Backend</h3><p>[ languages,<br>services, APIs ]</p></div>
+        <div><h3>Frontend</h3><p>[ frameworks,<br>interfaces ]</p></div>
+        <div><h3>Data</h3><p>[ pipelines,<br>volume, tooling ]</p></div>
+        <div><h3>Infrastructure</h3><p>[ deploy,<br>monitoring ]</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 4 · SCALE ========== -->
+  <section class="beat" id="b4">
+    <div class="inner inner--wide">
+      <p class="tag">Beat 04 · Contango · 2023 — 2026</p>
+      <h2 data-split>Then a codebase bigger than me.</h2>
+      <p class="lede rv">Commodity trading software. The job stopped being "can you build this"
+        and became <em>"what should we build, and what will it cost us later?"</em> — contributing
+        to a large system, then shaping what went into it.</p>
+      <div class="chips rv rv--2">
+        <span class="chip chip--ph">[ system you owned ]</span>
+        <span class="chip chip--ph">[ project you shaped ]</span>
+        <span class="chip chip--ph">[ decision you'd defend ]</span>
+        <span class="chip">Three years · through college</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 5 · THE RUPTURE ========== -->
+  <section class="beat" id="b5">
+    <div class="inner inner--mid">
+      <p class="tag">Beat 05</p>
+      <h2 data-split>Then AI arrived. So does any of that <span class="strike">still matter?</span></h2>
+      <p class="lede rv rv--2">It's the honest question, and every engineer graduating right now is
+        being asked it — usually by someone who already thinks they know the answer.</p>
+    </div>
+  </section>
+
+  <!-- ========== 6 · LEVERAGE ========== -->
+  <section class="beat" id="b6">
+    <div class="inner">
+      <p class="tag">Beat 06 · The answer</p>
+      <h2 data-split>It matters more. It's the thing that makes the leverage work.</h2>
+      <p class="lede rv">I didn't stop building — I started building faster than I could have alone.
+        But AI amplifies whatever judgment you bring to it. <em>Point it at a codebase you don't
+        understand and it will help you make a bigger mess, faster.</em></p>
+      <div class="chips rv rv--2">
+        <span class="chip chip--ph">[ how you actually work now ]</span>
+        <span class="chip chip--ph">[ what you delegate ]</span>
+        <span class="chip chip--ph">[ what you never delegate ]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 7 · JUDGMENT ========== -->
+  <section class="beat" id="b7">
+    <div class="inner inner--wide">
+      <p class="tag">Beat 07 · Taste is the constraint now</p>
+      <h2 data-split>Ten times more ambitious. Ten times faster.</h2>
+      <p class="lede rv">Five years of shipping taught me which problems are worth solving and
+        which abstractions will hurt in six months. That's the part that doesn't get automated.</p>
+      <div class="ba rv rv--2">
+        <div class="ba__c"><h3>What changed</h3><p>[ the scope of project you'd
+          have attempted before ]</p></div>
+        <div class="ba__x">→</div>
+        <div class="ba__c ba__c--now"><h3>What didn't</h3><p>[ the scope you attempt now —
+          and the judgment that makes it hold up ]</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 8 · NEXT ========== -->
+  <section class="beat" id="b8">
+    <div class="inner inner--mid">
+      <p class="tag">Beat 08</p>
+      <h2 data-split>I love to build. What's next?</h2>
+      <p class="lede rv rv--2">Graduating [ month, year ] with a B.S. in Computer Science and five
+        years of production work behind me. Looking for [ the kind of team and problem ].</p>
+      <div class="cta rv rv--3">
+        <a class="btn btn--p" href="#0">Résumé</a>
+        <a class="btn" href="#0">See the work</a>
+        <a class="btn" href="#0">Email me</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var root = document.documentElement;
+  root.classList.add('js');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- split headlines into animatable words ---------- */
+  document.querySelectorAll('h2[data-split]').forEach(function(h){
+    var frag = document.createDocumentFragment();
+    // walk child nodes so inline <span class="strike"> survives the split
+    Array.prototype.forEach.call(h.childNodes, function(node){
+      if(node.nodeType === 3){
+        node.textContent.split(/(\s+)/).forEach(function(tok){
+          if(!tok) return;
+          if(/^\s+$/.test(tok)){ frag.appendChild(document.createTextNode(' ')); return; }
+          var w = document.createElement('span'); w.className = 'w';
+          var b = document.createElement('b'); b.textContent = tok;
+          w.appendChild(b); frag.appendChild(w);
+        });
+      } else {
+        var w2 = document.createElement('span'); w2.className = 'w';
+        var b2 = document.createElement('b'); b2.appendChild(node.cloneNode(true));
+        w2.appendChild(b2); frag.appendChild(w2);
+      }
+    });
+    h.innerHTML = ''; h.appendChild(frag);
+    h.querySelectorAll('.w b').forEach(function(b,i){
+      b.style.transitionDelay = (i * 0.055) + 's';
+    });
+  });
+
+  /* ---------- activate beats + rail ---------- */
+  var beats = [].slice.call(document.querySelectorAll('.beat'));
+  var links = [].slice.call(document.querySelectorAll('.rail a'));
+  beats[0].classList.add('on');
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting) e.target.classList.add('on');
+    });
+  }, {threshold:0.25});
+  beats.forEach(function(b){ io.observe(b); });
+
+  /* ---------- scroll progress → palette + rail ---------- */
+  var p = 0, targetP = 0;
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function clamp01(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+  function measure(){
+    var max = document.body.scrollHeight - innerHeight;
+    targetP = max > 0 ? clamp01(scrollY / max) : 0;
+
+    // rail state from which beat owns the viewport middle
+    var mid = scrollY + innerHeight/2, cur = 0;
+    beats.forEach(function(b,i){
+      if(b.offsetTop <= mid) cur = i;
+    });
+    links.forEach(function(a,i){
+      a.classList.toggle('on', i === cur);
+      a.classList.toggle('done', i < cur);
+    });
+  }
+
+  function paint(){
+    // hue/saturation tell the story: warm while hand-built, drained at the
+    // rupture, cool once the leverage arrives.
+    var h, s;
+    if(p < 0.44){ h = 35; s = 72; }
+    else if(p < 0.58){ var t = (p-0.44)/0.14; h = 35; s = lerp(72, 7, t); }
+    else if(p < 0.74){ var u = (p-0.58)/0.16; h = lerp(35, 172, u); s = lerp(7, 68, u); }
+    else { h = 172; s = 68; }
+    root.style.setProperty('--h', h.toFixed(1));
+    root.style.setProperty('--s', s.toFixed(1) + '%');
+  }
+
+  addEventListener('scroll', measure, {passive:true});
+  addEventListener('resize', measure);
+  measure(); p = targetP; paint();
+
+  /* ================================================================
+     THE STREAM — glyph columns behind everything.
+     density / speed / color all read from scroll progress p.
+     ================================================================ */
+  var cv = document.getElementById('stream'), ctx = cv.getContext('2d');
+  var GLYPH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789{}[]()<>/\\=+-*&|;:_$#@!?'.split('');
+  var cols = [], cw = 15, rows = 0, dpr = Math.min(devicePixelRatio || 1, 2);
+  var MAXCOL = 46, TAIL = 11;
+
+  function build(){
+    cv.width  = Math.max(1, innerWidth  * dpr);
+    cv.height = Math.max(1, innerHeight * dpr);
+    cv.style.width = innerWidth + 'px';
+    cv.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.font = '13px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.textBaseline = 'top';
+
+    rows = Math.ceil(innerHeight / 17) + TAIL;
+    var n = Math.min(MAXCOL, Math.floor(innerWidth / cw));
+    cols = [];
+    for(var i=0;i<n;i++){
+      cols.push({
+        x: (i + .5) * (innerWidth / n),
+        y: Math.random() * rows,
+        v: 0.10 + Math.random() * 0.16,
+        seed: Math.random() * 1000,
+        chars: []
+      });
+      for(var r=0;r<rows;r++) cols[i].chars.push(GLYPH[(Math.random()*GLYPH.length)|0]);
+    }
+  }
+  build();
+  addEventListener('resize', build);
+
+  function drawStream(){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+
+    // how much of the stream is awake, and how fast
+    var density, speed, stall;
+    if(p < 0.44){ density = lerp(0.10, 0.30, p/0.44); speed = 1; stall = 0; }
+    else if(p < 0.58){ var t=(p-0.44)/0.14; density = lerp(0.30,0.16,t); speed = lerp(1,0.04,t); stall = t; }
+    else if(p < 0.74){ var u=(p-0.58)/0.16; density = lerp(0.16,0.92,u); speed = lerp(0.04,2.6,u); stall = 1-u; }
+    else { density = 0.92; speed = 2.6; stall = 0; }
+
+    var live = Math.ceil(cols.length * density);
+    var hue = getComputedStyle(root).getPropertyValue('--h').trim() || '35';
+    var sat = getComputedStyle(root).getPropertyValue('--s').trim() || '72%';
+
+    for(var i=0;i<live;i++){
+      var c = cols[i];
+      if(!reduce) c.y += c.v * speed;
+      if(c.y > rows) c.y = -TAIL;
+
+      var head = Math.floor(c.y);
+      for(var k=0;k<TAIL;k++){
+        var r = head - k;
+        if(r < 0 || r >= rows) continue;
+        var fade = (1 - k/TAIL);
+        // glitch during the stall: characters churn without advancing
+        if(stall > 0.25 && Math.random() < 0.045*stall){
+          c.chars[r] = GLYPH[(Math.random()*GLYPH.length)|0];
+        }
+        var lum = k === 0 ? 72 : 44;
+        var alpha = (k === 0 ? 0.62 : 0.30) * fade * (0.35 + density*0.75);
+        ctx.fillStyle = 'hsl(' + hue + ' ' + sat + ' ' + lum + '% / ' + alpha.toFixed(3) + ')';
+        ctx.fillText(c.chars[r], c.x, r * 17);
+      }
+      // occasionally mutate the head glyph so it reads as being written
+      if(Math.random() < 0.06) c.chars[head % rows] = GLYPH[(Math.random()*GLYPH.length)|0];
+    }
+  }
+
+  if(reduce){
+    p = targetP; paint(); drawStream();
+    addEventListener('scroll', function(){ p = targetP; paint(); drawStream(); }, {passive:true});
+  } else {
+    (function loop(){
+      requestAnimationFrame(loop);
+      p += (targetP - p) * 0.07;      // ease toward scroll position
+      paint();
+      drawStream();
+    })();
+  }
+})();
+</script>
+</body>
+</html>

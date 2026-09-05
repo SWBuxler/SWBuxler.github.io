@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal Idioms</title>
+<style>
+:root{
+  --bg:#0b0d0a; --raised:#10130e; --sunk:#070805;
+  --text:#b8d8b8; --bright:#e8f5e8; --mute:#6e8f68; --dim:#4d6b48;
+  --amber:#ffb000; --amber-dim:#4a3a10;
+  --rule:#24361f; --rule-firm:#35502f;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--mono);
+     font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.shell{max-width:80rem;margin:0 auto;padding:0 1.5rem}
+h1,h2,h3{margin:0;color:var(--bright);font-weight:700;letter-spacing:-.02em}
+a{color:var(--amber)}
+code{background:var(--raised);border:1px solid var(--rule);padding:.05em .3em;color:var(--bright)}
+kbd{background:var(--raised);border:1px solid var(--rule-firm);border-bottom-width:2px;
+    padding:.05em .38em;font-size:.85em;color:var(--bright)}
+
+.top{padding:3.5rem 0 2rem}
+.kick{font-size:.74rem;color:var(--mute);margin:0 0 1rem}
+.kick::before{content:"$ ";color:var(--amber)}
+.top h1{font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15;margin-bottom:.9rem}
+.top p{color:var(--mute);max-width:62ch;margin:0 0 1rem}
+
+/* verdicts */
+.verdicts{display:grid;gap:.7rem;margin:2rem 0 1rem;max-width:72ch}
+.v{border:1px dashed var(--rule-firm);padding:.85rem 1rem;background:var(--raised)}
+.v b{display:block;color:var(--bright);margin-bottom:.25rem;font-size:.92rem}
+.v b::before{content:"? ";color:var(--amber);font-weight:400}
+.v p{margin:0;font-size:.86rem;color:var(--mute)}
+.v .yes{color:#7fd47f}.v .no{color:#e0736b}.v .maybe{color:var(--amber)}
+
+/* groups + tiles */
+.grp{padding:2.8rem 0 .5rem}
+.grp__h{display:flex;align-items:baseline;gap:.8rem;padding-bottom:.7rem;
+        border-bottom:1px dashed var(--rule);margin-bottom:.6rem}
+.grp__h h2{font-size:1.05rem}
+.grp__h h2::before{content:"## ";color:var(--amber);font-weight:400}
+.grp__h span{margin-left:auto;font-size:.72rem;color:var(--dim)}
+.grp__n{color:var(--mute);font-size:.85rem;max-width:66ch;margin:0 0 1.5rem}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(23rem,1fr));gap:1rem}
+.t{border:1px solid var(--rule);background:var(--raised);display:flex;flex-direction:column}
+.t__d{padding:.9rem 1rem 1rem}
+.t__h{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.35rem}
+.t__n{font-size:.74rem;color:var(--amber)}
+.t__t{font-size:.94rem;font-weight:700;color:var(--bright)}
+.t__p{margin:0 0 .6rem;font-size:.83rem;color:var(--mute)}
+.t__m{display:flex;flex-wrap:wrap;gap:.3rem;font-size:.68rem}
+.t__m b{font-weight:400;border:1px solid var(--rule);padding:.05rem .35rem;color:var(--dim)}
+.t__m b.good{color:#7fd47f;border-color:#22401f}
+.t__m b.warn{color:var(--amber);border-color:var(--amber-dim)}
+.stage{background:var(--sunk);border-bottom:1px solid var(--rule);padding:.9rem 1rem;
+       min-height:9.5rem;font-size:.8rem;line-height:1.7;overflow:hidden}
+.stage--tall{min-height:13rem}
+
+/* window chrome */
+.win{border:1px solid var(--rule-firm);background:var(--sunk)}
+.win__bar{display:flex;align-items:center;gap:.5rem;padding:.35rem .6rem;
+          background:var(--raised);border-bottom:1px solid var(--rule);font-size:.7rem;color:var(--dim)}
+.dots{display:flex;gap:.28rem}
+.dots i{width:8px;height:8px;border-radius:50%;display:block;background:var(--rule-firm)}
+.dots i:nth-child(1){background:#e0736b}.dots i:nth-child(2){background:#e0b04f}
+.dots i:nth-child(3){background:#7fd47f}
+.win__t{margin:0 auto;color:var(--mute)}
+.win__b{padding:.7rem .8rem;font-size:.78rem}
+
+/* tabs */
+.tabs{display:flex;background:var(--raised);border-bottom:1px solid var(--rule);font-size:.74rem}
+.tabs span{padding:.4rem .8rem;color:var(--dim);border-right:1px solid var(--rule);cursor:pointer}
+.tabs span.on{background:var(--sunk);color:var(--amber);border-bottom:1px solid var(--sunk)}
+.tabs span:hover{color:var(--text)}
+
+/* status line */
+.status{display:flex;font-size:.7rem;background:var(--amber);color:#0b0d0a;font-weight:700}
+.status i{font-style:normal;padding:.18rem .55rem}
+.status .sp{margin-left:auto;background:rgba(0,0,0,.14)}
+.status .md{background:rgba(0,0,0,.22)}
+
+/* prompt / command bar */
+.cli{font-size:.8rem}
+.cli__out{min-height:5.5rem;max-height:5.5rem;overflow-y:auto;color:var(--mute);margin-bottom:.4rem}
+.cli__out div{white-space:pre-wrap}
+.cli__row{display:flex;align-items:center;gap:.45rem;border-top:1px dashed var(--rule);padding-top:.45rem}
+.cli__ps{color:var(--amber);flex:none}
+.cli__wrap{position:relative;flex:1;min-width:0}
+.cli__ghost{position:absolute;inset:0;pointer-events:none;white-space:pre;color:var(--dim);
+            font:inherit;line-height:inherit}
+.cli__ghost b{color:transparent;font-weight:400}
+.cli__in{width:100%;background:transparent;border:0;outline:0;color:var(--bright);
+         font:inherit;line-height:inherit;padding:0;caret-color:var(--amber)}
+.cli__hint{font-size:.68rem;color:var(--dim);margin-top:.4rem}
+.cli__comp{display:flex;flex-wrap:wrap;gap:.5rem;font-size:.72rem;color:var(--mute);margin-top:.3rem}
+.cli__comp b{font-weight:400}
+.cli__comp b.sel{color:var(--amber);text-decoration:underline}
+
+/* palette */
+.pal{border:1px solid var(--rule-firm);background:var(--sunk)}
+.pal__in{width:100%;background:var(--raised);border:0;border-bottom:1px solid var(--rule);
+         outline:0;color:var(--bright);font:inherit;font-size:.82rem;padding:.5rem .7rem;caret-color:var(--amber)}
+.pal__l{list-style:none;margin:0;padding:.3rem;max-height:7.5rem;overflow-y:auto}
+.pal__l li{padding:.25rem .45rem;font-size:.78rem;color:var(--mute);display:flex;gap:.5rem;cursor:pointer}
+.pal__l li .k{color:var(--dim);margin-left:auto;font-size:.7rem}
+.pal__l li.on{background:var(--raised);color:var(--amber)}
+
+/* ls / git / man */
+.mono-out{font-size:.76rem;line-height:1.75;white-space:pre;overflow-x:auto;color:var(--mute)}
+.mono-out .p{color:var(--dim)}
+.mono-out .n{color:var(--bright)}
+.mono-out .a{color:var(--amber)}
+.mono-out .g{color:#7fd47f}
+
+/* typed hero */
+.typed{font-size:.86rem}
+.typed .ps{color:var(--amber)}
+.typed .cur{display:inline-block;width:.55em;height:1em;background:var(--amber);
+            vertical-align:-.13em;animation:bl 1s steps(1) infinite}
+@keyframes bl{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+/* progress */
+.dl{font-size:.78rem}
+.dl__bar{font-family:var(--mono);color:var(--amber);letter-spacing:-.05em}
+.btn{background:transparent;border:1px solid var(--rule-firm);color:var(--text);
+     font:inherit;font-size:.76rem;padding:.25rem .7rem;cursor:pointer;margin-top:.5rem}
+.btn:hover{border-color:var(--amber);color:var(--amber)}
+
+/* stepped contact */
+.step{font-size:.8rem}
+.step .q{color:var(--amber)}
+.step .a{color:var(--bright)}
+.step .pend{color:var(--dim)}
+
+/* keys demo */
+.keys{font-size:.78rem}
+.keys__l{list-style:none;margin:0;padding:0}
+.keys__l li{padding:.2rem .4rem;color:var(--mute);display:flex;gap:.5rem}
+.keys__l li.on{background:var(--raised);color:var(--amber)}
+.keys__l li.on::before{content:"›";color:var(--amber)}
+.keys__l li::before{content:" ";width:.8em;display:inline-block}
+
+/* phosphor + scanline */
+.glow{font-size:1.05rem;color:var(--text);text-shadow:0 0 7px rgba(184,216,184,.45)}
+.glow b{color:var(--amber);text-shadow:0 0 9px rgba(255,176,0,.55)}
+.scan{position:relative;font-size:.85rem}
+.scan::after{content:"";position:absolute;inset:-1rem;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px)}
+
+/* end */
+.end{padding:3rem 0 5rem;border-top:1px dashed var(--rule);margin-top:3rem}
+.end h2{font-size:1.15rem;margin-bottom:1rem}
+.end p,.end li{color:var(--mute);max-width:70ch}
+.end ol{padding-left:1.3rem}.end li{margin-bottom:.55rem}
+.end strong{color:var(--bright)}
+.bundle{border:1px dashed var(--rule-firm);border-left:2px solid var(--amber);
+        background:var(--raised);padding:.85rem 1rem;margin:.7rem 0;max-width:70ch}
+.bundle b{display:block;color:var(--bright);margin-bottom:.2rem}
+.bundle span{font-size:.85rem;color:var(--mute)}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header class="top">
+  <p class="kick">terminal idioms · seth hartzler portfolio</p>
+  <h1>How far to push the terminal</h1>
+  <p>Twenty ways to carry the Terminal design further into the site. The interactive
+     ones below are real — type in them. Your three questions answered first.</p>
+
+  <div class="verdicts">
+    <div class="v"><b>Should we have terminal tabs?</b>
+      <p><span class="no">No.</span> Tabs mean several things open at once; the site has three
+      pages. They'd eat vertical space on mobile and imply state that doesn't exist. Take the
+      <em>window chrome</em> instead (idea 01) — same signal, does real work by showing the path.</p></div>
+    <div class="v"><b>Should you be able to type, with autocomplete?</b>
+      <p><span class="yes">Yes</span> — but layered <em>over</em> normal clickable navigation, never
+      as the only way through. It's the single most credible "this person actually lives in a
+      terminal" signal on the whole site. Ideas 05–08. If a recruiter never types, they lose
+      nothing.</p></div>
+    <div class="v"><b>Can we use 08, the typed hero?</b>
+      <p><span class="maybe">Yes, with one condition.</span> It has to finish fast and never
+      replay, and the text must be in the HTML so it's readable with JS off. Idea 09. Note the
+      intro already opens with a story beat — typing both would be one flourish too many.</p></div>
+  </div>
+</header>
+
+<!-- ============ A · CHROME ============ -->
+<section class="grp">
+  <div class="grp__h"><h2>Chrome and framing</h2><span>01–04</span></div>
+  <p class="grp__n">Persistent furniture around the content. Cheap, always visible, and the
+     easiest way to make the whole site feel like one application rather than a theme.</p>
+  <div class="grid">
+
+    <div class="t"><div class="stage">
+      <div class="win">
+        <div class="win__bar"><div class="dots"><i></i><i></i><i></i></div>
+          <span class="win__t">seth@hartzler — ~/projects/project-qqq</span></div>
+        <div class="win__b" style="color:var(--mute)">Page content sits inside the window.<br>
+          The title bar always shows where you are.</div>
+      </div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">01</span><span class="t__t">Window chrome</span></div>
+      <p class="t__p">The whole site framed as one terminal window. Traffic lights, and a title
+        bar that tracks the current path. Does the job tabs would, without pretending.</p>
+      <div class="t__m"><b class="good">cheap</b><b>CSS only</b><b class="good">recommended</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="win">
+        <div class="tabs"><span class="on">~/work</span><span>~/about</span><span>~/projects</span></div>
+        <div class="win__b" style="color:var(--mute)">Three tabs for three pages.<br>
+          <span style="color:var(--dim)">Implies concurrent state the site doesn't have.</span></div>
+      </div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">02</span><span class="t__t">Terminal tabs</span></div>
+      <p class="t__p">Pages as tabs. Shown so you can judge it — I'd skip it. It costs mobile
+        height and implies you have several things open when you have one.</p>
+      <div class="t__m"><b class="warn">not recommended</b><b>CSS only</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div style="color:var(--mute);font-size:.78rem;margin-bottom:.5rem">…end of the write-up.</div>
+      <div class="status"><i class="md">NORMAL</i><i>project-qqq.html</i>
+        <i class="sp">tradeoffs</i><i class="md">62%</i></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">03</span><span class="t__t">Status line</span></div>
+      <p class="t__p">A vim/tmux status bar pinned to the bottom: current file, current section,
+        scroll percentage. It's a progress indicator wearing a costume — real utility on the long
+        project pages.</p>
+      <div class="t__m"><b class="good">cheap</b><b>tiny JS</b><b class="good">does real work</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="mono-out"><span class="p">~/</span><span class="n">seth</span>
+<span class="p">├──</span> <span class="n">about</span>
+<span class="p">├──</span> <span class="n">projects/</span>
+<span class="p">│   ├──</span> <span class="a">project-qqq</span>
+<span class="p">│   ├──</span> <span class="n">project-ghostbusters</span>
+<span class="p">│   ├──</span> <span class="n">market-share-analysis</span>
+<span class="p">│   └──</span> <span class="n">positions-report</span>
+<span class="p">└──</span> <span class="n">resume.pdf</span></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">04</span><span class="t__t">File tree nav</span></div>
+      <p class="t__p">The sitemap as a directory listing, with the current page highlighted.
+        Replaces a conventional nav on wide screens; collapses to normal links on mobile.</p>
+      <div class="t__m"><b class="good">cheap</b><b>CSS only</b><b>desktop only</b></div>
+    </div></div>
+
+  </div>
+</section>
+
+<!-- ============ B · TYPING ============ -->
+<section class="grp">
+  <div class="grp__h"><h2>Typing and commands</h2><span>05–09 · these are live, type in them</span></div>
+  <p class="grp__n">The heart of the question. All of these are enhancements over working links —
+     nothing here is the only route to anything.</p>
+  <div class="grid">
+
+    <div class="t"><div class="stage stage--tall">
+      <div class="cli" id="cli">
+        <div class="cli__out" id="cliOut"><div class="p">type <b style="color:var(--amber);font-weight:400">help</b> and press Enter · Tab completes · ↑ recalls</div></div>
+        <div class="cli__row"><span class="cli__ps">~/seth $</span>
+          <span class="cli__wrap">
+            <span class="cli__ghost" id="cliGhost"><b id="cliTyped"></b><span id="cliRest"></span></span>
+            <input class="cli__in" id="cliIn" autocomplete="off" spellcheck="false" aria-label="Demo command line">
+          </span></div>
+        <div class="cli__comp" id="cliComp"></div>
+      </div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">05</span><span class="t__t">Command line</span></div>
+      <p class="t__p">A real prompt. <code>ls</code>, <code>cd projects</code>,
+        <code>cat resume</code>, <code>whoami</code>, <code>open qqq</code>, <code>contact</code>.
+        Navigating by typing, for the people who'd rather.</p>
+      <div class="t__m"><b class="good">flagship</b><b>~80 lines JS</b><b class="good">never the only route</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage stage--tall">
+      <div class="pal">
+        <input class="pal__in" id="palIn" placeholder="Type to filter…" autocomplete="off" aria-label="Demo command palette">
+        <ul class="pal__l" id="palList"></ul>
+      </div>
+      <p style="font-size:.68rem;color:var(--dim);margin:.5rem 0 0">In the real site this opens on <kbd>⌘K</kbd>.</p>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">06</span><span class="t__t">Command palette</span></div>
+      <p class="t__p">⌘K fuzzy-jump to any page, project, or section. The most <em>useful</em> idea
+        here, and the one people already know from their editor.</p>
+      <div class="t__m"><b class="good">high utility</b><b>~50 lines JS</b><b class="good">recommended</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="cli" style="font-size:.8rem">
+        <div style="color:var(--mute);margin-bottom:.5rem">Ghost text completes ahead of the cursor,
+          the way zsh-autosuggestions does. <kbd>→</kbd> or <kbd>Tab</kbd> accepts it.</div>
+        <div class="cli__row" style="border:0;padding:0">
+          <span class="cli__ps">$</span>
+          <span><span style="color:var(--bright)">cat re</span><span style="color:var(--dim)">sume.pdf</span><span class="cur" style="display:inline-block;width:.55em;height:1em;background:var(--amber);vertical-align:-.13em"></span></span>
+        </div>
+      </div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">07</span><span class="t__t">Ghost autocomplete</span></div>
+      <p class="t__p">Dim completion trailing the cursor. It's the detail that separates "styled
+        like a terminal" from "built by someone who uses one." Live in idea 05 — go type there.</p>
+      <div class="t__m"><b class="good">the tell</b><b>part of 05</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="cli" style="font-size:.8rem">
+        <div class="cli__row" style="border:0;padding:0"><span class="cli__ps">$</span>
+          <span style="color:var(--bright)">cd pro</span></div>
+        <div class="cli__comp" style="margin-top:.5rem">
+          <b class="sel">projects/</b><b>project-qqq</b><b>project-ghostbusters</b></div>
+        <div style="color:var(--dim);font-size:.7rem;margin-top:.6rem">Tab cycles · history persists
+          in localStorage across visits</div>
+      </div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">08</span><span class="t__t">Tab cycling + history</span></div>
+      <p class="t__p">Tab shows candidates and cycles them; <kbd>↑</kbd> walks back through
+        commands, remembered between visits. Small touches, correct behaviour.</p>
+      <div class="t__m"><b class="good">cheap once 05 exists</b><b>part of 05</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="typed"><span class="ps">$</span> whoami<br>
+        <span id="typedOut" style="color:var(--mute)"></span><span class="cur"></span></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">09</span><span class="t__t">Typed hero line</span></div>
+      <p class="t__p">Motion idea 08. The tagline types itself once and stops. Text lives in the
+        HTML and is revealed, so it's readable with JS off and never delays content.</p>
+      <div class="t__m"><b class="good">plays once</b><b>tiny JS</b><b class="warn">common</b></div>
+    </div></div>
+
+  </div>
+</section>
+
+<!-- ============ C · CONTENT AS OUTPUT ============ -->
+<section class="grp">
+  <div class="grp__h"><h2>Content as command output</h2><span>10–13</span></div>
+  <p class="grp__n">The most interesting group: real content rendered in a format the terminal
+     already has. These aren't costumes — each format genuinely suits its content.</p>
+  <div class="grid">
+
+    <div class="t"><div class="stage">
+      <div class="mono-out"><span class="p">$ ls -la ~/projects</span>
+<span class="p">drwxr-xr-x</span>  <span class="a">2.1k</span>  2025-03  <span class="n">project-qqq</span>
+<span class="p">drwxr-xr-x</span>  <span class="a">1.4k</span>  2025-06  <span class="n">project-ghostbusters</span>
+<span class="p">drwxr-xr-x</span>  <span class="a">890</span>   2025-09  <span class="n">market-share-analysis</span>
+<span class="p">drwxr-xr-x</span>  <span class="a">3.2k</span>  2026-01  <span class="n">positions-report</span></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">10</span><span class="t__t">Projects as <code>ls -la</code></span></div>
+      <p class="t__p">The project index as a directory listing — size column carrying something
+        true (lines of code, or duration), date column the ship date. Sortable by clicking a column.</p>
+      <div class="t__m"><b class="good">cheap</b><b>CSS only</b><b class="warn">needs real numbers</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="mono-out"><span class="a">commit 7f3a91c</span>
+<span class="p">Author:</span> Seth Hartzler
+<span class="p">Date:</span>   2023
+    <span class="n">feat: joined Contango</span>
+<span class="a">commit 2b8e04d</span>
+<span class="p">Date:</span>   2021
+    <span class="n">feat: first production ship, age 17</span></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">11</span><span class="t__t">Experience as <code>git log</code></span></div>
+      <p class="t__p">The career as commit history — newest first, which is how a résumé already
+        reads. My favourite idea on this page: the format fits the content exactly rather than
+        being imposed on it.</p>
+      <div class="t__m"><b class="good">cheap</b><b>CSS only</b><b class="good">strong fit</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage stage--tall">
+      <div class="mono-out"><span class="n">PROJECT-QQQ(1)</span>          Portfolio Manual
+
+<span class="a">NAME</span>
+     project-qqq — VOIP transcription, sentiment,
+     and extraction
+
+<span class="a">SYNOPSIS</span>
+     qqq [--transcribe] [--sentiment]
+
+<span class="a">DESCRIPTION</span>
+     TODO: what it did, and for whom.
+
+<span class="a">SEE ALSO</span>
+     ghostbusters(1), positions-report(1)</div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">12</span><span class="t__t">Write-ups as man pages</span></div>
+      <p class="t__p">NAME / SYNOPSIS / DESCRIPTION / SEE ALSO. A structure engineers read fluently,
+        and it forces exactly the discipline a good write-up needs. Cross-links become
+        <code>SEE ALSO</code>.</p>
+      <div class="t__m"><b class="good">structural</b><b>CSS only</b><b class="warn">rewrites the copy</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="mono-out"><span class="p">$ top -u seth</span>
+<span class="p">PID  COMMAND        %CPU  TIME</span>
+<span class="a">  1</span>  <span class="n">typescript</span>     <span class="g">94.2</span>  5y
+<span class="a">  2</span>  <span class="n">postgres</span>       <span class="g">81.0</span>  4y
+<span class="a">  3</span>  <span class="n">python</span>         <span class="g">77.4</span>  5y
+<span class="p">  4</span>  <span class="n">rust</span>           <span class="p">22.1</span>  8mo</div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">13</span><span class="t__t">Skills as <code>top</code></span></div>
+      <p class="t__p">Proficiency as CPU%, years as TIME. Fun, and honest about depth in a way a
+        tag cloud isn't — but self-scored percentages invite an argument you can't win.</p>
+      <div class="t__m"><b class="warn">cute, risky</b><b>CSS only</b></div>
+    </div></div>
+
+  </div>
+</section>
+
+<!-- ============ D · INTERACTIONS ============ -->
+<section class="grp">
+  <div class="grp__h"><h2>Interactions</h2><span>14–17</span></div>
+  <p class="grp__n">Small behaviours that reward the reader for knowing what they're looking at.</p>
+  <div class="grid">
+
+    <div class="t"><div class="stage">
+      <div class="keys"><div style="color:var(--dim);font-size:.7rem;margin-bottom:.4rem">
+        j / k to move · Enter to open · ? for help</div>
+        <ul class="keys__l" id="keyList">
+          <li class="on">project-qqq</li><li>project-ghostbusters</li>
+          <li>market-share-analysis</li><li>positions-report</li></ul>
+        <button class="btn" id="keyBtn" type="button">press j</button></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">14</span><span class="t__t">Vim keybindings</span></div>
+      <p class="t__p"><kbd>j</kbd>/<kbd>k</kbd> through the project list, <kbd>g h</kbd> home,
+        <kbd>?</kbd> for a shortcut sheet. Invisible to anyone who doesn't try it, delightful to
+        anyone who does.</p>
+      <div class="t__m"><b class="good">invisible cost</b><b>~40 lines JS</b><b class="good">recommended</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="dl"><div style="color:var(--mute)">$ curl -O resume.pdf</div>
+        <div class="dl__bar" id="dlBar">[                    ]   0%</div>
+        <button class="btn" id="dlBtn" type="button">run it</button></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">15</span><span class="t__t">Download as transfer</span></div>
+      <p class="t__p">The résumé button prints a curl-style progress bar while the file downloads.
+        Three seconds of charm on the one click that matters most.</p>
+      <div class="t__m"><b class="good">tiny</b><b>~20 lines JS</b><b class="warn">don't delay the file</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="step"><div><span class="q">name?</span> <span class="a">Ben Brame</span></div>
+        <div><span class="q">email?</span> <span class="a">ben@contango.live</span></div>
+        <div><span class="q">message?</span> <span class="pend">_</span></div>
+        <div style="color:var(--dim);font-size:.7rem;margin-top:.5rem">One field at a time, like a
+          CLI installer.</div></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">16</span><span class="t__t">Contact as a prompt</span></div>
+      <p class="t__p">The contact form asks one question at a time instead of showing a wall of
+        fields. Higher completion rates in practice, and it fits the idiom exactly.</p>
+      <div class="t__m"><b>~40 lines JS</b><b class="warn">needs a backend</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="mono-out"><span class="p">$ cd /projets</span>
+<span style="color:#e0736b">bash: cd: /projets: No such file or directory</span>
+
+<span class="p">Did you mean?</span>
+  <span class="a">→</span> <span class="n">/projects</span>
+  <span class="a">→</span> <span class="n">/about</span></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">17</span><span class="t__t">404 as command not found</span></div>
+      <p class="t__p">The one page where a joke costs nothing, because the visitor is already lost.
+        Fuzzy-matches the bad path against real pages and offers them.</p>
+      <div class="t__m"><b class="good">free win</b><b>one static page</b></div>
+    </div></div>
+
+  </div>
+</section>
+
+<!-- ============ E · ATMOSPHERE ============ -->
+<section class="grp">
+  <div class="grp__h"><h2>Atmosphere</h2><span>18–20</span></div>
+  <p class="grp__n">Pure surface. One of these is worth taking; the other two are how a terminal
+     theme starts looking like a costume.</p>
+  <div class="grid">
+
+    <div class="t"><div class="stage" style="display:flex;align-items:center">
+      <div class="glow">Seth Hartzler<br><b>$ five years shipping</b></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">18</span><span class="t__t">Phosphor glow</span></div>
+      <p class="t__p">A faint text-shadow in the text's own hue. Warms the page and takes the edge
+        off "stark" — which was the one complaint about the current build. Nearly free.</p>
+      <div class="t__m"><b class="good">cheap</b><b>one CSS line</b><b class="good">recommended</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage" style="display:flex;align-items:center">
+      <div class="scan">CRT scanlines over the whole page.<br>
+        <span style="color:var(--dim)">Reduces contrast on every line of text.</span></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">19</span><span class="t__t">Scanlines / CRT</span></div>
+      <p class="t__p">Authentic to 1984, hostile to reading. It fights the contrast work the palette
+        is doing. Shown so the option is on the table — I'd leave it.</p>
+      <div class="t__m"><b class="warn">hurts legibility</b><b>a11y risk</b></div>
+    </div></div>
+
+    <div class="t"><div class="stage">
+      <div class="mono-out" style="color:var(--mute)"><span class="g">[ ok ]</span> mounting ~/seth
+<span class="g">[ ok ]</span> loading experience … 5y
+<span class="g">[ ok ]</span> loading projects … 4
+<span class="a">[ ok ]</span> ready
+<span class="p">─────────────────────────</span>
+<span class="p">…then the site appears.</span></div>
+    </div><div class="t__d">
+      <div class="t__h"><span class="t__n">20</span><span class="t__t">Boot sequence</span></div>
+      <p class="t__p">Fake startup lines before the page. Charming once, irritating on the second
+        visit — and it delays content, which is the one thing a job-hunt site can't afford. The
+        story intro already occupies this slot.</p>
+      <div class="t__m"><b class="warn">delays content</b><b class="warn">redundant with the intro</b></div>
+    </div></div>
+
+  </div>
+</section>
+
+<!-- ============ END ============ -->
+<section class="end">
+  <h2>What I'd take</h2>
+  <p>The failure mode is a site that's <em>about</em> being a terminal instead of about Seth. The
+     defence is simple: take the ideas that do a job, skip the ones that only do a look.</p>
+
+  <div class="bundle"><b>Take these five</b>
+    <span>01 window chrome · 03 status line on project pages · 06 ⌘K palette ·
+    11 experience as git log · 18 phosphor glow. Every one earns its place — chrome shows the
+    path, the status line is a progress bar, the palette is faster navigation, git log fits the
+    content exactly, and the glow fixes the starkness.</span></div>
+
+  <div class="bundle"><b>Then, if you want the flourish</b>
+    <span>05 + 07 + 08 — the command line with ghost autocomplete, Tab cycling and persistent
+    history. This is the one that makes an engineer sit up. Build it after the content is done,
+    and only if the résumé and write-ups are already finished.</span></div>
+
+  <div class="bundle"><b>Free wins whenever</b>
+    <span>17 the 404 page, 15 the download transfer bar, 14 vim keys. None of them cost a
+    recruiter anything, because none of them are load-bearing.</span></div>
+
+  <h2 style="margin-top:2rem">Three rules</h2>
+  <ol>
+    <li><strong>Nothing is reachable only by typing.</strong> Every command has a link that does
+      the same thing. The prompt is an accelerator, not a gate.</li>
+    <li><strong>The joke never costs a recruiter time.</strong> No boot delay, no download that
+      waits on an animation, no content behind a command.</li>
+    <li><strong>Pick formats that fit the content.</strong> <code>git log</code> for a career and a
+      man page for a write-up work because the structure is genuinely right. <code>top</code> for
+      skills is a costume — it invites an argument about numbers you made up.</li>
+  </ol>
+
+  <p style="margin-top:1.4rem">Give me numbers and I'll build them.</p>
+</section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- 05 · command line ---------- */
+  var CMDS = {
+    'help':      'commands: ls · cd projects · cat resume · whoami · open <project> · contact · clear',
+    'ls':        'about  projects/  resume.pdf  contact',
+    'cd projects': 'project-qqq  project-ghostbusters  market-share-analysis  positions-report',
+    'cat resume':  '→ downloading seth-hartzler-resume.pdf',
+    'whoami':    'seth hartzler — software engineer. five years shipping, still finishing the degree.',
+    'open project-qqq': '→ projects/project-qqq.html',
+    'open project-ghostbusters': '→ projects/project-ghostbusters.html',
+    'open market-share-analysis': '→ projects/market-share-analysis.html',
+    'open positions-report': '→ projects/positions-report.html',
+    'contact':   'ben@contango.live · github · linkedin',
+    'clear':     ''
+  };
+  var NAMES = Object.keys(CMDS);
+  var input = document.getElementById('cliIn'),
+      typed = document.getElementById('cliTyped'),
+      rest  = document.getElementById('cliRest'),
+      out   = document.getElementById('cliOut'),
+      comp  = document.getElementById('cliComp');
+  var hist = [], hi = -1, cands = [], ci = 0;
+
+  function matches(v){ return v ? NAMES.filter(function(n){ return n.indexOf(v) === 0 && n !== v; }) : []; }
+
+  function refresh(){
+    var v = input.value;
+    typed.textContent = v;
+    cands = matches(v);
+    rest.textContent = cands.length ? cands[0].slice(v.length) : '';
+    comp.innerHTML = cands.length > 1
+      ? cands.map(function(c,i){ return '<b class="'+(i===ci?'sel':'')+'">'+c+'</b>'; }).join('')
+      : '';
+  }
+  function print(line, cls){
+    var d = document.createElement('div');
+    if(cls) d.className = cls;
+    d.textContent = line;
+    out.appendChild(d);
+    out.scrollTop = out.scrollHeight;
+  }
+  input.addEventListener('input', function(){ ci = 0; refresh(); });
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Tab' || (e.key === 'ArrowRight' && input.selectionStart === input.value.length)){
+      if(cands.length){ e.preventDefault();
+        if(e.key === 'Tab' && cands.length > 1){ input.value = cands[ci]; ci = (ci+1) % cands.length; }
+        else { input.value = cands[0]; }
+        refresh();
+      }
+      return;
+    }
+    if(e.key === 'ArrowUp'){ e.preventDefault();
+      if(hist.length){ hi = Math.min(hi+1, hist.length-1); input.value = hist[hi]; refresh(); } return; }
+    if(e.key === 'ArrowDown'){ e.preventDefault();
+      hi = Math.max(hi-1, -1); input.value = hi < 0 ? '' : hist[hi]; refresh(); return; }
+    if(e.key === 'Enter'){
+      var v = input.value.trim();
+      if(!v) return;
+      hist.unshift(v); hi = -1;
+      if(v === 'clear'){ out.innerHTML = ''; input.value=''; refresh(); return; }
+      print('~/seth $ ' + v);
+      print(CMDS.hasOwnProperty(v) ? CMDS[v] : 'command not found: ' + v + '  (try: help)');
+      input.value = ''; refresh();
+    }
+  });
+  refresh();
+
+  /* ---------- 06 · palette ---------- */
+  var ITEMS = [
+    ['Home','/'],['About','/about'],['Project QQQ','/projects/qqq'],
+    ['Project Ghostbusters','/projects/ghostbusters'],
+    ['Visual Market Share Analysis','/projects/market-share'],
+    ['Interactive Positions Report','/projects/positions'],
+    ['Experience','#experience'],['Contact','#contact'],['Résumé (PDF)','↓']
+  ];
+  var pin = document.getElementById('palIn'), plist = document.getElementById('palList'), psel = 0;
+  function fuzzy(q,s){ // subsequence match, the way a palette actually filters
+    q = q.toLowerCase(); s = s.toLowerCase();
+    var i = 0; for(var j=0;j<s.length && i<q.length;j++) if(s[j]===q[i]) i++;
+    return i === q.length;
+  }
+  function drawPal(){
+    var q = pin.value.trim();
+    var rows = ITEMS.filter(function(it){ return !q || fuzzy(q, it[0]); });
+    if(psel >= rows.length) psel = Math.max(0, rows.length-1);
+    plist.innerHTML = rows.length
+      ? rows.map(function(it,i){
+          return '<li class="'+(i===psel?'on':'')+'">'+it[0]+'<span class="k">'+it[1]+'</span></li>'; }).join('')
+      : '<li style="color:var(--dim)">no matches</li>';
+  }
+  pin.addEventListener('input', function(){ psel = 0; drawPal(); });
+  pin.addEventListener('keydown', function(e){
+    var n = plist.children.length;
+    if(e.key === 'ArrowDown'){ e.preventDefault(); psel = (psel+1) % n; drawPal(); }
+    if(e.key === 'ArrowUp'){ e.preventDefault(); psel = (psel-1+n) % n; drawPal(); }
+  });
+  drawPal();
+
+  /* ---------- 09 · typed hero ---------- */
+  var msg = 'five years shipping ag + commodity software.';
+  var el = document.getElementById('typedOut'), i = 0;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ el.textContent = msg; }
+  else {
+    var tick = setInterval(function(){
+      el.textContent = msg.slice(0, i++);
+      if(i > msg.length) clearInterval(tick);   /* plays once, never replays */
+    }, 45);
+  }
+
+  /* ---------- 14 · keys ---------- */
+  var rows = [].slice.call(document.getElementById('keyList').children), sel = 0;
+  document.getElementById('keyBtn').addEventListener('click', function(){
+    rows[sel].classList.remove('on'); sel = (sel+1) % rows.length; rows[sel].classList.add('on');
+  });
+
+  /* ---------- 15 · transfer bar ---------- */
+  var bar = document.getElementById('dlBar');
+  document.getElementById('dlBtn').addEventListener('click', function(){
+    var pc = 0;
+    var t = setInterval(function(){
+      pc = Math.min(100, pc + 4 + Math.random()*9);
+      var f = Math.round(pc/5);
+      bar.textContent = '[' + '='.repeat(f) + ' '.repeat(20-f) + '] ' +
+                        String(Math.round(pc)).padStart(3,' ') + '%';
+      if(pc >= 100) clearInterval(t);
+    }, 70);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+/* ==========================================================================
+   Seth Hartzler — portfolio
+   Design system: TERMINAL. Committed single theme (phosphor on near-black).
+   No build step, no dependencies, no webfonts.
+
+   Two deliberate constraints:
+     · Everything is monospace, but prose is tuned (15px / 1.8 / 68ch) so the
+       long project write-ups stay readable rather than authentically painful.
+     · A real print stylesheet at the bottom flips the whole site to black-on-
+       white, because recruiters print things and phosphor-on-black does not.
+   ========================================================================== */
+
+:root{
+  /* ground */
+  --bg:#0b0d0a;
+  --bg-raised:#10130e;
+  --bg-sunken:#070805;
+
+  /* phosphor */
+  --text:#b8d8b8;        /* body */
+  --text-bright:#e8f5e8; /* headings, emphasis */
+  --text-mute:#6e8f68;   /* secondary — 5.4:1 on --bg, passes AA */
+  --text-dim:#4d6b48;    /* decoration only, never sole carrier of meaning */
+
+  /* amber — the single accent. Used sparingly: it means "act here". */
+  --amber:#ffb000;
+  --amber-dim:#4a3a10;
+
+  --rule:#24361f;
+  --rule-firm:#35502f;
+
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+
+  --measure:68ch;
+  --gutter:1.5rem;
+}
+
+/* --- reset ---------------------------------------------------------------- */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.8;
+  -webkit-font-smoothing:antialiased;
+}
+img,video{max-width:100%;height:auto;display:block}
+a{color:inherit}
+
+/* --- layout --------------------------------------------------------------- */
+.wrap{max-width:var(--measure);margin:0 auto;padding:0 var(--gutter)}
+.wrap--wide{max-width:82ch}
+main{padding-bottom:6rem}
+section+section{margin-top:4rem}
+
+/* --- header --------------------------------------------------------------- */
+.site-head{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,13,10,.92);
+  backdrop-filter:blur(8px);
+  border-bottom:1px dashed var(--rule);
+}
+.site-head__inner{
+  max-width:82ch;margin:0 auto;padding:.7rem var(--gutter);
+  display:flex;align-items:center;gap:1.1rem;
+}
+.brand{text-decoration:none;margin-right:auto;color:var(--amber);font-size:.92rem}
+.brand::before{content:"~/";color:var(--text-dim)}
+.brand:hover{color:var(--text-bright)}
+
+.nav{display:flex;gap:.85rem;align-items:center}
+.nav a{text-decoration:none;color:var(--text-mute);font-size:.84rem}
+.nav a::before{content:"[";color:var(--text-dim)}
+.nav a::after{content:"]";color:var(--text-dim)}
+.nav a:hover{color:var(--text-bright)}
+.nav a:hover::before,.nav a:hover::after{color:var(--amber)}
+.nav a[aria-current="page"]{color:var(--text-bright)}
+.nav a[aria-current="page"]::before,
+.nav a[aria-current="page"]::after{color:var(--amber)}
+@media (max-width:34rem){
+  .site-head__inner{gap:.7rem}
+  .nav{gap:.55rem}
+  .nav a{font-size:.78rem}
+}
+
+/* --- type ----------------------------------------------------------------- */
+h1,h2,h3{line-height:1.25;margin:0 0 .6rem;color:var(--text-bright);font-weight:700}
+h1{font-size:clamp(1.7rem,5vw,2.3rem);letter-spacing:-.02em}
+h2{font-size:1.15rem}
+h3{font-size:1rem}
+p{margin:0 0 1.2rem;max-width:var(--measure)}
+p.lede{color:var(--text-bright)}
+strong{color:var(--text-bright);font-weight:700}
+em{color:var(--text-bright);font-style:normal;text-decoration:underline;
+   text-decoration-color:var(--amber-dim);text-underline-offset:3px}
+
+/* section labels read as commands: `$ experience` ------------------------- */
+.eyebrow{
+  font-size:.78rem;letter-spacing:.04em;text-transform:lowercase;
+  color:var(--text-mute);margin:0 0 1.1rem;
+  display:flex;align-items:center;gap:.6rem;
+}
+.eyebrow::before{content:"$";color:var(--amber);flex:none}
+.eyebrow::after{content:"";flex:1;height:1px;
+  background:repeating-linear-gradient(90deg,var(--rule) 0 4px,transparent 4px 8px)}
+
+.link{color:var(--amber);text-decoration:none;border-bottom:1px solid var(--amber-dim)}
+.link:hover{border-bottom-color:var(--amber)}
+
+/* --- hero ----------------------------------------------------------------- */
+.hero{padding:3.5rem 0 0}
+.hero h1{margin-bottom:.9rem}
+.hero h1::after{
+  content:"\2588";color:var(--amber);font-weight:400;margin-left:.15em;
+  animation:cursor 1.05s steps(1) infinite;
+}
+@keyframes cursor{0%,50%{opacity:1}51%,100%{opacity:0}}
+.hero .lede{max-width:62ch}
+.hero__meta{
+  font-size:.8rem;color:var(--text-mute);
+  display:flex;flex-direction:column;gap:.15rem;margin-top:1.5rem;
+}
+.hero__meta span::before{content:"# ";color:var(--text-dim)}
+
+.actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.8rem}
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.4rem .8rem;font-size:.84rem;text-decoration:none;
+  border:1px solid var(--rule-firm);color:var(--text);background:transparent;
+  transition:border-color .15s,color .15s;
+}
+.btn:hover{border-color:var(--text-mute);color:var(--text-bright)}
+.btn--primary{border-color:var(--amber);color:var(--amber)}
+.btn--primary:hover{background:var(--amber);color:#0b0d0a;border-color:var(--amber)}
+
+/* --- experience ----------------------------------------------------------- */
+.role{
+  display:grid;grid-template-columns:11ch 1fr;gap:0 1.5rem;
+  padding:1.3rem 0;border-top:1px dashed var(--rule);
+}
+.role:last-child{border-bottom:1px dashed var(--rule)}
+.role__when{font-size:.8rem;color:var(--text-mute);padding-top:.2rem;
+            font-variant-numeric:tabular-nums}
+.role__title{margin:0 0 .1rem;font-size:1rem}
+.role__title::before{content:"> ";color:var(--amber)}
+.role__org{font-size:.82rem;color:var(--text-mute);margin:0 0 .8rem}
+.role__org a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--rule-firm)}
+.role__org a:hover{color:var(--amber);border-bottom-color:var(--amber)}
+.role p:last-child{margin-bottom:0}
+.role ul{margin:0;padding-left:0;list-style:none}
+.role li{margin-bottom:.4rem;padding-left:1.4rem;position:relative}
+.role li::before{content:"·";position:absolute;left:.45rem;color:var(--amber)}
+@media (max-width:34rem){
+  .role{grid-template-columns:1fr}
+  .role__when{padding-top:0;margin-bottom:.35rem}
+}
+
+/* --- project list --------------------------------------------------------- */
+.projects{display:grid;gap:0}
+.project{
+  display:block;text-decoration:none;
+  padding:1.2rem 0;border-top:1px dashed var(--rule);
+}
+.project:last-child{border-bottom:1px dashed var(--rule)}
+.project__row{display:flex;align-items:baseline;gap:.6rem}
+.project__name{font-size:1rem;color:var(--text-bright);font-weight:700}
+.project__name::before{content:"> ";color:var(--amber);font-weight:400}
+.project__arrow{margin-left:auto;color:var(--text-dim);transition:transform .18s ease,color .18s}
+.project:hover .project__name{color:var(--amber)}
+.project:hover .project__arrow{transform:translateX(4px);color:var(--amber)}
+.project__desc{color:var(--text);margin:.35rem 0 .7rem;font-size:.9rem;
+               padding-left:2ch;max-width:62ch}
+.project__tags{display:flex;flex-wrap:wrap;gap:.5rem;padding-left:2ch}
+
+.tag{font-size:.76rem;color:var(--text-mute)}
+.tag::before{content:"[";color:var(--text-dim)}
+.tag::after{content:"]";color:var(--text-dim)}
+.tag--video{color:var(--amber)}
+.tag--video::before,.tag--video::after{color:var(--amber-dim)}
+
+/* --- project page --------------------------------------------------------- */
+.backlink{font-size:.8rem;color:var(--text-mute);text-decoration:none;
+          display:inline-block;margin:2.2rem 0 1.4rem}
+.backlink:hover{color:var(--amber)}
+
+.pj-head{padding-bottom:1.8rem;border-bottom:1px dashed var(--rule)}
+.pj-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(16ch,1fr));
+          gap:1rem;margin-top:1.6rem}
+.pj-fact dt{font-size:.72rem;color:var(--text-dim);margin-bottom:.15rem}
+.pj-fact dt::before{content:"# "}
+.pj-fact dd{margin:0;font-size:.86rem;color:var(--text-bright)}
+
+/* video: framed like a terminal window ------------------------------------ */
+.video{margin:2.2rem 0;border:1px solid var(--rule-firm);background:var(--bg-sunken)}
+.video::before{
+  content:"● ● ●";display:block;font-size:.6rem;letter-spacing:.35em;
+  color:var(--text-dim);padding:.4rem .7rem;border-bottom:1px solid var(--rule);
+  background:var(--bg-raised);
+}
+.video video,.video iframe{width:100%;display:block;aspect-ratio:16/9;border:0}
+.video__cap{font-size:.78rem;color:var(--text-mute);padding:.6rem .8rem;
+            border-top:1px dashed var(--rule);background:var(--bg-raised)}
+
+/* prose: the readability concession --------------------------------------- */
+.prose{max-width:var(--measure)}
+.prose h2{margin-top:2.5rem;font-size:1.1rem}
+.prose h2::before{content:"## ";color:var(--amber);font-weight:400}
+.prose h3{margin-top:1.8rem;font-size:.96rem}
+.prose h3::before{content:"### ";color:var(--text-dim);font-weight:400}
+.prose ul,.prose ol{padding-left:0;list-style:none}
+.prose ul li{margin-bottom:.5rem;padding-left:1.6rem;position:relative}
+.prose ul li::before{content:"-";position:absolute;left:.45rem;color:var(--amber)}
+.prose ol{counter-reset:n}
+.prose ol li{margin-bottom:.5rem;padding-left:2.2rem;position:relative;counter-increment:n}
+.prose ol li::before{content:counter(n)".";position:absolute;left:.3rem;color:var(--amber);
+                     font-variant-numeric:tabular-nums}
+.prose code{background:var(--bg-raised);border:1px solid var(--rule);padding:.05em .3em;
+            color:var(--text-bright)}
+.prose blockquote{margin:1.4rem 0;padding:.1rem 0 .1rem 1rem;
+                  border-left:2px solid var(--amber);color:var(--text-mute)}
+
+.pj-nav{display:flex;justify-content:space-between;gap:1rem;
+        margin-top:3.5rem;padding-top:1.3rem;border-top:1px dashed var(--rule);font-size:.85rem}
+.pj-nav a{color:var(--text-mute);text-decoration:none}
+.pj-nav a:hover{color:var(--amber)}
+
+/* --- TODO callout: a commented-out block --------------------------------- */
+.todo{
+  border:1px dashed var(--rule-firm);background:var(--bg-raised);
+  padding:.8rem 1rem;margin:1.2rem 0;font-size:.84rem;color:var(--text-mute);
+  max-width:var(--measure);
+}
+.todo::before{
+  content:"// TODO";display:block;color:var(--amber);font-size:.74rem;
+  letter-spacing:.06em;margin-bottom:.3rem;
+}
+.todo p{margin:0;max-width:none}
+.todo p+p{margin-top:.5rem}
+
+/* --- contact / footer ----------------------------------------------------- */
+.contact-links{display:flex;flex-direction:column;gap:.35rem;margin-top:1rem}
+.contact-links a{font-size:.9rem;text-decoration:none;color:var(--text);width:max-content}
+.contact-links a::before{content:"→ ";color:var(--amber)}
+.contact-links a:hover{color:var(--amber)}
+
+.site-foot{
+  border-top:1px dashed var(--rule);margin-top:4.5rem;padding:1.6rem 0;
+  font-size:.78rem;color:var(--text-dim);
+}
+.site-foot .wrap{max-width:82ch;display:flex;justify-content:space-between;
+                 gap:1rem;flex-wrap:wrap}
+
+/* --- a11y ----------------------------------------------------------------- */
+.skip{position:absolute;left:-9999px;top:0;background:var(--amber);color:#0b0d0a;
+      padding:.45rem .85rem;z-index:100;text-decoration:none}
+.skip:focus{left:.5rem;top:.5rem}
+:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+::selection{background:var(--amber);color:#0b0d0a}
+
+/* ==========================================================================
+   PRINT — the whole point of this block: a recruiter hitting Cmd+P gets a
+   clean black-on-white document, not forty sheets of black toner.
+   ========================================================================== */
+@media print{
+  :root{
+    --bg:#fff;--bg-raised:#fff;--bg-sunken:#fff;
+    --text:#000;--text-bright:#000;--text-mute:#444;--text-dim:#666;
+    --amber:#000;--amber-dim:#999;--rule:#bbb;--rule-firm:#888;
+  }
+  body{background:#fff;color:#000;font-size:10.5pt;line-height:1.5}
+  .site-head,.site-foot,.video,.skip,.backlink,.pj-nav,.actions{display:none}
+  .hero h1::after{display:none}          /* no blinking cursor on paper */
+  .wrap,.wrap--wide,.prose,p{max-width:none}
+  .hero{padding-top:0}
+  a{text-decoration:none}
+  .link,.role__org a{border:0}
+  /* spell out link targets, since a printed page can't be clicked */
+  .contact-links a::after{content:" (" attr(href) ")";font-size:9pt;color:#555}
+  .todo{border:1px solid #bbb}
+  section+section{margin-top:1.5rem}
+  .role,.project{break-inside:avoid}
+}
+
+/* ==========================================================================
+   TERMINAL IDIOMS
+   Window chrome, the vim-style bottom bar (status line AND command prompt —
+   one line doing both jobs, the way vim does), the command palette, git-log
+   experience, and phosphor glow.
+
+   The chrome, bar and palette are injected by terminal.js rather than
+   duplicated into six HTML files. They are progressive enhancement: with JS
+   off the site is exactly what it was.
+   ========================================================================== */
+
+:root{ --winbar:28px; --statusbar:24px; }
+
+/* --- 18 · phosphor glow ---------------------------------------------------
+   A faint shadow in each element's own hue. Enough to warm the page; not
+   enough to soften an edge. Dropped entirely for print. */
+body{text-shadow:0 0 6px rgba(184,216,184,.16)}
+h1,h2,h3,strong,.text-bright{text-shadow:0 0 9px rgba(232,245,232,.22)}
+.brand,.btn--primary,.tag--video,.eyebrow::before,.project__name::before{
+  text-shadow:0 0 10px rgba(255,176,0,.30)}
+
+/* --- 01 · window chrome --------------------------------------------------- */
+body.has-chrome{padding-top:var(--winbar);padding-bottom:var(--statusbar)}
+.win-bar{
+  position:fixed;top:0;left:0;right:0;height:var(--winbar);z-index:90;
+  display:flex;align-items:center;gap:.5rem;padding:0 .7rem;
+  background:var(--bg-raised);border-bottom:1px solid var(--rule);
+  font-size:.7rem;color:var(--text-dim);
+}
+.win-dots{display:flex;gap:.3rem;flex:none}
+.win-dots i{width:8px;height:8px;border-radius:50%;display:block}
+.win-dots i:nth-child(1){background:#c25f57}
+.win-dots i:nth-child(2){background:#c2954a}
+.win-dots i:nth-child(3){background:#5f9e5f}
+.win-title{margin:0 auto;color:var(--text-mute);white-space:nowrap;overflow:hidden;
+           text-overflow:ellipsis;max-width:70%}
+.win-title b{color:var(--text);font-weight:400}
+.win-hint{flex:none;color:var(--text-dim)}
+@media (max-width:40rem){.win-hint{display:none}}
+
+/* the sticky page header sits below the title bar */
+.site-head{top:var(--winbar)}
+
+/* --- 03 + 05 · the bottom bar --------------------------------------------
+   Status by default; press : or / and it becomes the command prompt. */
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:95;height:var(--statusbar);
+  display:flex;align-items:stretch;font-size:.72rem;
+  background:var(--amber);color:#0b0d0a;
+}
+.bar__mode{padding:0 .6rem;display:flex;align-items:center;font-weight:700;
+           background:rgba(0,0,0,.20);flex:none}
+.bar__file{padding:0 .6rem;display:flex;align-items:center;font-weight:600;
+           white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar__sect{padding:0 .6rem;display:flex;align-items:center;margin-left:auto;
+           background:rgba(0,0,0,.10);white-space:nowrap;flex:none}
+.bar__pct{padding:0 .6rem;display:flex;align-items:center;font-weight:700;
+          background:rgba(0,0,0,.20);flex:none;font-variant-numeric:tabular-nums}
+@media (max-width:44rem){.bar__sect{display:none}}
+
+/* command mode: the bar goes dark and grows a prompt */
+.bar.cmd{background:var(--bg-sunken);color:var(--text);
+         border-top:1px solid var(--rule-firm);height:auto;min-height:var(--statusbar);
+         flex-direction:column;align-items:stretch}
+.bar.cmd .bar__mode,.bar.cmd .bar__file,.bar.cmd .bar__sect,.bar.cmd .bar__pct{display:none}
+.bar__cli{display:none;padding:.25rem .6rem;align-items:center;gap:.4rem}
+.bar.cmd .bar__cli{display:flex}
+.bar__ps{color:var(--amber);flex:none}
+.bar__wrap{position:relative;flex:1;min-width:0}
+.bar__ghost{position:absolute;inset:0;pointer-events:none;white-space:pre;
+            color:var(--text-dim);font:inherit;line-height:inherit}
+.bar__ghost b{color:transparent;font-weight:400}
+.bar__in{width:100%;background:transparent;border:0;outline:0;color:var(--text-bright);
+         font:inherit;line-height:inherit;padding:0;caret-color:var(--amber)}
+.bar__out{display:none;padding:.1rem .6rem .4rem 1.9rem;color:var(--text-mute);
+          font-size:.74rem;max-height:7rem;overflow-y:auto}
+.bar.cmd .bar__out{display:block}
+.bar__out div{white-space:pre-wrap}
+.bar__out .err{color:#e0736b}
+.bar__comp{display:none;gap:.6rem;flex-wrap:wrap;padding:0 .6rem .35rem 1.9rem;font-size:.7rem}
+.bar.cmd .bar__comp{display:flex}
+.bar__comp b{font-weight:400;color:var(--text-mute)}
+.bar__comp b.sel{color:var(--amber);text-decoration:underline}
+
+/* --- 06 · command palette ------------------------------------------------- */
+.pal{position:fixed;inset:0;z-index:120;display:none;
+     background:rgba(7,8,5,.72);backdrop-filter:blur(3px);
+     align-items:flex-start;justify-content:center;padding:12vh 1rem 1rem}
+.pal.open{display:flex}
+.pal__box{width:min(46rem,100%);background:var(--bg-raised);
+          border:1px solid var(--rule-firm);box-shadow:0 18px 60px rgba(0,0,0,.55)}
+.pal__in{width:100%;background:var(--bg-sunken);border:0;
+         border-bottom:1px solid var(--rule);outline:0;color:var(--text-bright);
+         font:inherit;font-size:.9rem;padding:.6rem .8rem;caret-color:var(--amber)}
+.pal__l{list-style:none;margin:0;padding:.3rem;max-height:46vh;overflow-y:auto}
+.pal__l li{padding:.35rem .55rem;font-size:.84rem;color:var(--text-mute);
+           display:flex;gap:.6rem;align-items:baseline;cursor:pointer}
+.pal__l li .k{margin-left:auto;color:var(--text-dim);font-size:.72rem}
+.pal__l li.on{background:var(--bg-sunken);color:var(--amber)}
+.pal__l li.on .k{color:var(--amber)}
+.pal__l li.none{color:var(--text-dim);cursor:default}
+.pal__foot{border-top:1px dashed var(--rule);padding:.35rem .8rem;
+           font-size:.68rem;color:var(--text-dim);display:flex;gap:1rem}
+
+/* --- 11 · experience as git log ------------------------------------------- */
+.gitlog{margin-top:.4rem}
+.commit{padding:1.3rem 0;border-top:1px dashed var(--rule)}
+.commit:last-child{border-bottom:1px dashed var(--rule)}
+.commit__hash{margin:0 0 .2rem;font-size:.86rem;color:var(--amber)}
+.commit__hash::before{content:"commit ";color:var(--text-dim)}
+.commit__meta{margin:0;font-size:.8rem;color:var(--text-mute)}
+.commit__meta b{display:inline-block;width:8ch;color:var(--text-dim);font-weight:400}
+.commit__meta a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--rule-firm)}
+.commit__meta a:hover{color:var(--amber);border-bottom-color:var(--amber)}
+.commit__body{padding-left:4ch;margin-top:.9rem}
+.commit__body h3{font-size:.98rem;margin:0 0 .5rem}
+.commit__body h3::before{content:"";}
+.commit__body p{font-size:.9rem;margin-bottom:.7rem}
+.commit__body ul{margin:0;padding-left:0;list-style:none}
+.commit__body li{margin-bottom:.35rem;padding-left:1.5rem;position:relative;font-size:.88rem}
+.commit__body li::before{content:"*";position:absolute;left:.45rem;color:var(--amber)}
+@media (max-width:34rem){.commit__body{padding-left:1.5ch}}
+
+@media print{
+  body{text-shadow:none}
+  h1,h2,h3,strong{text-shadow:none}
+  .win-bar,.bar,.pal{display:none!important}
+  body.has-chrome{padding-top:0;padding-bottom:0}
+  .commit__hash{color:#000}
+}

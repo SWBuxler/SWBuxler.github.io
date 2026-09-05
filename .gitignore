@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Raw screen recordings — 3456x2016, ~800 MB together, and three of the four
+# exceed GitHub's hard 100 MB file limit. Only the compressed MP4s in
+# assets/files/ ship. Re-encode command is in the README.
+videos/
+*.mov
+*.MOV
+raw/
