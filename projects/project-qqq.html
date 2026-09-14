@@ -4,11 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Project QQQ — Seth Hartzler</title>
-<meta name="description" content="TODO: one-sentence summary of Project QQQ for search results and link previews.">
-<meta property="og:title" content="Project QQQ — Seth Hartzler">
-<meta property="og:description" content="TODO: one-sentence summary.">
-<meta property="og:image" content="https://TODO-domain.com/assets/img/project-qqq-og.png">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="../assets/css/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.82em' font-size='78' fill='%23ffb000' font-family='monospace'>&gt;_</text></svg>">
 </head>
@@ -33,23 +28,15 @@
 
     <!-- ================================================== HEADER ======== -->
     <header class="pj-head">
-      <p class="eyebrow">Contango · One of 4</p>
+      <p class="eyebrow">Contango · 1 of 3</p>
       <h1>Project QQQ</h1>
       <p class="lede">AI-enabled VOIP transcription, sentiment, and extraction.</p>
 
       <dl class="pj-facts">
-        <div class="pj-fact"><dt>Role</dt><dd>TODO: e.g. sole engineer</dd></div>
-        <div class="pj-fact"><dt>Timeline</dt><dd>TODO: e.g. Spring 2025, 3 months</dd></div>
-        <div class="pj-fact"><dt>Stack</dt><dd>TODO: languages, framework, database</dd></div>
-        <div class="pj-fact"><dt>Team</dt><dd>TODO: e.g. 2 engineers + PM</dd></div>
+        <div class="pj-fact"><dt>Date Made</dt><dd>Summer 2026</dd></div>
+        <div class="pj-fact"><dt>Technologies</dt><dd>Python, Django, Amazon Transcribe, OpenAI GPT, Vue.js</dd></div>
       </dl>
     </header>
-
-    <div class="todo">
-      <p><strong>One-sentence summary needed.</strong> The title says what it is to
-      someone who already knows the domain. Add a line a recruiter with no grain-market
-      background would understand -- what problem it solved, and for whom.</p>
-    </div>
 
     <!-- =================================================== VIDEO ======== -->
     <!--
@@ -69,64 +56,65 @@
         <a href="../assets/files/project-qqq-demo.mp4">Download the demo (MP4)</a>.
       </video>
       <figcaption class="video__cap">
-        4:29 — TODO: one line on what the viewer is watching.
+        4:29 - Video demonstration of Project QQQ, provided by Ben Brame.
       </figcaption>
     </figure>
-
-    <div class="todo">
-      <p><strong>Video is in place</strong> (4:29, from <code>voip.mov</code>). Still needed:
-      a caption line saying what the viewer is watching, and confirmation that
-      Contango is happy with everything visible on screen.</p>
-    </div>
 
     <!-- ==================================================== BODY ======== -->
     <div class="prose">
 
       <h2>The problem</h2>
       <p>
-        TODO: what was broken or missing before this existed? Who felt the pain,
-        and how did they work around it? Specifics carry the whole page —
-        "merchandisers were reconciling positions by hand in a spreadsheet every
-        morning" is worth more than "the process was inefficient."
+        Our customer needed a way to analyze phone calls made between grain
+        originators and farmers and extract usable insights. They wanted to
+        be able to automatically detect data points from recordings of phone
+        calls and pull those data points into the app. This would require a
+        robust architecture incorporating LLM API calls, VoIP providers, and
+        operations performed asynchronously from the user - and the task fell
+        to me to build it.
       </p>
 
       <h2>What I built</h2>
       <p>
-        TODO: the shape of the solution in plain language, then the interesting
-        parts. Assume the reader is an engineer who will ask "why that way?"
+        The structure I built consisted of three conceptual portions. The first
+        was the call and recording provider, which could retrieve call recordings
+        from an individual company's external VoIP API or initiate and record calls
+        from within our app itself. The second was the transcription process, which
+        utilized Amazon's transcription services to asynchronously generate transcripts
+        from the recordings produced by the first step. Finally, the pipeline utilized
+        LLM calls to clean the input intelligently and extract observations in a format
+        that could be used by other portions of the app. The whole pipeline took motion
+        in a series of asynchronous tasks, separating the user from the timing issues of
+        the backend operations.
       </p>
-      <ul>
-        <li>TODO: key piece of the system.</li>
-        <li>TODO: key piece of the system.</li>
-        <li>TODO: key piece of the system.</li>
-      </ul>
 
-      <h2>Decisions and tradeoffs</h2>
+      <h2>Challenges</h2>
       <p>
-        TODO: this is the section that separates this site from every other new
-        grad portfolio. Pick one or two real forks in the road — a data model, a
-        sync strategy, build vs. buy — and explain what you chose, what you gave
-        up, and whether you'd choose it again.
+        In making this pipeline usable for different customers with different VoIP providers,
+        I implemented a hexagonal architecture that allowed each step of the pipeline to be
+        swapped out for a different implementation based on who was using the app. Backfilling
+        was another big part of the puzzle - our customer had a database of thousands of phone
+        calls, and I had to create a system to process large chunks of past data without the
+        user suffering performance issues. To do this, I created administrative commands to
+        allow the backfill call processing to occur in quiet, controllable intervals.
+        <br>
+        <br>
+        The most persistent headache during development, however, was the problem of partially
+        complete records. Throughout development, internal records would accumulate errored and
+        partial runs of the transcription/analysis pipeline. The ability to manually run individual
+        stages of the pipeline on a set of records was my solution to this issue, but it was still
+        only a partial one, and the problem persisted in various forms across the development of the
+        feature.
       </p>
 
-      <h3>TODO: name the decision</h3>
-      <p>TODO: the options, the constraint that decided it, the cost you accepted.</p>
-
-      <h2>Hard parts</h2>
-      <p>
-        TODO: the thing that took three tries. Be honest about it — interviewers
-        ask about this section more than any other.
-      </p>
-
-      <h2>Outcome</h2>
-      <p>
-        TODO: what changed once it shipped. Numbers if they're shareable; if not,
-        describe the before/after qualitatively. Also: is it still in production?
-        How many people use it?
-      </p>
-
-      <h2>What I'd do differently</h2>
-      <p>TODO: one honest paragraph. Shows judgment and growth.</p>
+      <h2>What I learned</h2>
+      <p>The VoIP pipeline was my most ambitious project yet, with a large scope
+        and clear customer impact. It was also the first feature that I built with
+        extensive use of generative AI assistants such as Claude Code. I learned
+        how to use LLM tools as a force multiplier, while also getting first-hand
+        experience with their limitations. I also exploited asynchronicity for the
+        first time in a production setting by creating custom Celery tasks to
+        transcribe and process call transcripts.</p>
 
     </div>
 

@@ -13,7 +13,6 @@ projects/
   _template.html        Copy this to add another project
   project-qqq.html             VOIP transcription / sentiment / extraction
   project-ghostbusters.html    "Which farmer are you gonna call?"
-  market-share-analysis.html   Visual market share analysis
   positions-report.html        Interactive positions report
 assets/
   css/site.css          All styling. Colors are tokens at the top.

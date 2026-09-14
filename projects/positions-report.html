@@ -33,23 +33,15 @@
 
     <!-- ================================================== HEADER ======== -->
     <header class="pj-head">
-      <p class="eyebrow">Contango · Four of 4</p>
+      <p class="eyebrow">Contango · 3 of 3</p>
       <h1>Interactive Commodity Trading Positions Report</h1>
-      <p class="lede">TODO: one line -- what the report let people see and do.</p>
+      <p class="lede">Visualize and intuitively examine trading contracts in tabular form.</p>
 
       <dl class="pj-facts">
-        <div class="pj-fact"><dt>Role</dt><dd>TODO: e.g. sole engineer</dd></div>
-        <div class="pj-fact"><dt>Timeline</dt><dd>TODO: e.g. Spring 2025, 3 months</dd></div>
-        <div class="pj-fact"><dt>Stack</dt><dd>TODO: languages, framework, database</dd></div>
-        <div class="pj-fact"><dt>Team</dt><dd>TODO: e.g. 2 engineers + PM</dd></div>
+        <div class="pj-fact"><dt>Date Made</dt><dd>Summer 2025</dd></div>
+        <div class="pj-fact"><dt>Technologies</dt><dd>Python, Django, Vue.js</dd></div>
       </dl>
     </header>
-
-    <div class="todo">
-      <p><strong>One-sentence summary needed.</strong> The title says what it is to
-      someone who already knows the domain. Add a line a recruiter with no grain-market
-      background would understand -- what problem it solved, and for whom.</p>
-    </div>
 
     <!-- =================================================== VIDEO ======== -->
     <!--
@@ -69,69 +61,57 @@
         <a href="../assets/files/positions-report-demo.mp4">Download the demo (MP4)</a>.
       </video>
       <figcaption class="video__cap">
-        1:47 — TODO: one line on what the viewer is watching.
+        1:47 - Video demonstration of the positions report, provided by Ben Brame.
       </figcaption>
     </figure>
-
-    <div class="todo">
-      <p><strong>Video is in place</strong> (1:47, from <code>Position Report.mov</code>). Still needed:
-      a caption line saying what the viewer is watching, and confirmation that
-      Contango is happy with everything visible on screen.</p>
-    </div>
 
     <!-- ==================================================== BODY ======== -->
     <div class="prose">
 
       <h2>The problem</h2>
       <p>
-        TODO: what was broken or missing before this existed? Who felt the pain,
-        and how did they work around it? Specifics carry the whole page —
-        "merchandisers were reconciling positions by hand in a spreadsheet every
-        morning" is worth more than "the process was inefficient."
+        One form of data our customers tracked on our app was contracts - used to
+        track agreements to buy or sell a commodity. Our goal was to display this
+        contract data in a user-friendly table where contracts could be filtered
+        and grouped into logical units. We also wanted to let our users interact
+        with the table to view the details of individual contracts, but at a more
+        manageable scale than looking through the entire contract list.
       </p>
 
       <h2>What I built</h2>
       <p>
-        TODO: the shape of the solution in plain language, then the interesting
-        parts. Assume the reader is an engineer who will ask "why that way?"
+        The construction of the table itself was straightforward; the real meat of the project
+        came with the extra features associated with the table's unique design
+        requirements. Various filters on the frontend altered which data was shown on the
+        table without having to send a request to the backend with every filter change, a
+        design choice made to keep filter changes fast and responsive. All the filtering, selection, and
+        aggregation required speedy TypeScript implementation, which I created mostly by hand with the
+        use of some limited AI tools for specific issues.
       </p>
-      <ul>
-        <li>TODO: key piece of the system.</li>
-        <li>TODO: key piece of the system.</li>
-        <li>TODO: key piece of the system.</li>
-      </ul>
 
-      <h2>Decisions and tradeoffs</h2>
+      <h2>Challenges</h2>
       <p>
-        TODO: this is the section that separates this site from every other new
-        grad portfolio. Pick one or two real forks in the road — a data model, a
-        sync strategy, build vs. buy — and explain what you chose, what you gave
-        up, and whether you'd choose it again.
+        As mentioned in the previous section, one of the main priorities was making sure that the program
+        would respond quickly to user input. My solution to this issue was to control what data was transmitted
+        to the frontend and how it was structured, in addition to making sure the filtering operations were as
+        streamlined as possible to minimize the number of times they would have to iterate over the complete
+        dataset. Another approached I took to addressing the latency issue was making these operations
+        asynchronous, which helped to keep the UI from freezing while the filtering was taking place.
       </p>
 
-      <h3>TODO: name the decision</h3>
-      <p>TODO: the options, the constraint that decided it, the cost you accepted.</p>
-
-      <h2>Hard parts</h2>
+      <h2>What I learned</h2>
       <p>
-        TODO: the thing that took three tries. Be honest about it — interviewers
-        ask about this section more than any other.
+        The position report table was a heavily user-facing feature, and accordingly, I had to dedicate as much effort
+        to making sure the table did its job in an intuitive, smooth, and user-friendly way as I did to ensuring it
+        did its job correctly. In doing so, I got a lot of experience with evaluating the "feel" of a piece of software
+        as well as its technical correctness, which I have found to be a valuable skill for working with frontend applications,
+        and one I use often.
       </p>
-
-      <h2>Outcome</h2>
-      <p>
-        TODO: what changed once it shipped. Numbers if they're shareable; if not,
-        describe the before/after qualitatively. Also: is it still in production?
-        How many people use it?
-      </p>
-
-      <h2>What I'd do differently</h2>
-      <p>TODO: one honest paragraph. Shows judgment and growth.</p>
 
     </div>
 
     <nav class="pj-nav">
-      <a href="market-share-analysis.html">← Market Share Analysis</a>
+      <a href="project-ghostbusters.html">← Project Ghostbusters</a>
       <a href="../index.html#contact">Get in touch →</a>
     </nav>
 

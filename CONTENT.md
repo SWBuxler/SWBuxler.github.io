@@ -40,19 +40,18 @@ For **each** of Contango and Solinftec:
 - [ ] 2–3 sentences: what the company does, what he owned
 - [ ] 2–3 bullets of shipped work — system, stack, outcome
 
-## 4. The four projects
+## 4. The three projects
 
-Names and slugs are in place; the write-ups are not. **Open question: are all four
+Names and slugs are in place; the write-ups are not. **Open question: are all three
 Contango, or are some from Solinftec?** The pages currently say Contango.
 
 | Project | Page |
 |---|---|
 | Project QQQ — AI-enabled VOIP transcription, sentiment, extraction | `projects/project-qqq.html` |
 | Project Ghostbusters — "which farmer are you gonna call?" | `projects/project-ghostbusters.html` |
-| Visual Market Share Analysis | `projects/market-share-analysis.html` |
 | Interactive Commodity Trading Positions Report | `projects/positions-report.html` |
 
-For **each** of the four, the page has these sections waiting:
+For **each** of the three, the page has these sections waiting:
 
 - [ ] One-sentence summary a non-expert understands
 - [ ] Role, timeline, stack, team size
@@ -63,15 +62,14 @@ For **each** of the four, the page has these sections waiting:
 - [ ] **Outcome** — what changed, still in production?
 - [ ] **What I'd do differently**
 
-## 5. The four video demos
+## 5. The three video demos
 
-**Done.** All four are transcoded, in place, and wired to their pages:
+**Done.** All three are transcoded, in place, and wired to their pages:
 
 | Project | Source | Length | Shipped file |
 |---|---|---|---|
 | Project QQQ | `voip.mov` | 4:29 | `assets/files/project-qqq-demo.mp4` |
 | Project Ghostbusters | `Selection Demo.mov` | 2:27 | `assets/files/project-ghostbusters-demo.mp4` |
-| Visual Market Share Analysis | `Market Share.mov` | 1:01 | `assets/files/market-share-analysis-demo.mp4` |
 | Interactive Positions Report | `Position Report.mov` | 1:47 | `assets/files/positions-report-demo.mp4` |
 
 Two things still open on them:

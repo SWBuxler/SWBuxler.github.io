@@ -4,11 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Project Ghostbusters — Seth Hartzler</title>
-<meta name="description" content="TODO: one-sentence summary of Project Ghostbusters for search results and link previews.">
-<meta property="og:title" content="Project Ghostbusters — Seth Hartzler">
-<meta property="og:description" content="TODO: one-sentence summary.">
-<meta property="og:image" content="https://TODO-domain.com/assets/img/project-ghostbusters-og.png">
-<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="../assets/css/site.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.82em' font-size='78' fill='%23ffb000' font-family='monospace'>&gt;_</text></svg>">
 </head>
@@ -33,23 +28,15 @@
 
     <!-- ================================================== HEADER ======== -->
     <header class="pj-head">
-      <p class="eyebrow">Contango · Two of 4</p>
+      <p class="eyebrow">Contango · 2 of 3</p>
       <h1>Project Ghostbusters</h1>
       <p class="lede">Which farmer are you gonna call?</p>
 
       <dl class="pj-facts">
-        <div class="pj-fact"><dt>Role</dt><dd>TODO: e.g. sole engineer</dd></div>
-        <div class="pj-fact"><dt>Timeline</dt><dd>TODO: e.g. Spring 2025, 3 months</dd></div>
-        <div class="pj-fact"><dt>Stack</dt><dd>TODO: languages, framework, database</dd></div>
-        <div class="pj-fact"><dt>Team</dt><dd>TODO: e.g. 2 engineers + PM</dd></div>
+        <div class="pj-fact"><dt>Date Made</dt><dd>Summer 2024</dd></div>
+        <div class="pj-fact"><dt>Technologies</dt><dd>Python, Django, Vue.js</dd></div>
       </dl>
     </header>
-
-    <div class="todo">
-      <p><strong>One-sentence summary needed.</strong> The title says what it is to
-      someone who already knows the domain. Add a line a recruiter with no grain-market
-      background would understand -- what problem it solved, and for whom.</p>
-    </div>
 
     <!-- =================================================== VIDEO ======== -->
     <!--
@@ -69,70 +56,72 @@
         <a href="../assets/files/project-ghostbusters-demo.mp4">Download the demo (MP4)</a>.
       </video>
       <figcaption class="video__cap">
-        2:27 — TODO: one line on what the viewer is watching.
+        2:27 - Video demonstration of Project Ghostbusters, provided by Ben Brame.
       </figcaption>
     </figure>
-
-    <div class="todo">
-      <p><strong>Video is in place</strong> (2:27, from <code>Selection Demo.mov</code>). Still needed:
-      a caption line saying what the viewer is watching, and confirmation that
-      Contango is happy with everything visible on screen.</p>
-    </div>
 
     <!-- ==================================================== BODY ======== -->
     <div class="prose">
 
       <h2>The problem</h2>
       <p>
-        TODO: what was broken or missing before this existed? Who felt the pain,
-        and how did they work around it? Specifics carry the whole page —
-        "merchandisers were reconciling positions by hand in a spreadsheet every
-        morning" is worth more than "the process was inefficient."
+        Grain trading involves a variety of factors, not least of which is distance.
+        Freight costs can impact a farmer's decision to sell their grain to one buyer
+        over another, which means that a buyer having the best bid for a particular
+        transaction won't guarantee that they will get the transaction if they are too
+        far away from the farmer. My task was to build a visualization for the tipping
+        point for each farmer - the bid where, when factoring in freight costs and competitor
+        bids, the farmer would find it more profitable to sell to a client than to a
+        competitor. This visualization would take the form of a heatmap, allowing a user to
+        take in the tipping points for many farmers at once, and thus allowing them to decide
+        whose business they can gain most easily.
       </p>
 
       <h2>What I built</h2>
       <p>
-        TODO: the shape of the solution in plain language, then the interesting
-        parts. Assume the reader is an engineer who will ask "why that way?"
+        My solution was to add dedicated calculation logic to the backend to find
+        out the best total profit for each farmer given that they would sell to a competitor
+        and not to the user, as well as the freight cost for shipping to the elevator for which
+        we wanted to run the calculation. By subtracting one from the other, we could find the
+        bid that an elevator would have to make in order to sway a farmer to do business with them
+        instead of a competitor. Running this optimization logic on each farmer produced a set of values
+        that would then be sent to the frontend via a standard API endpoint and displayed in the form of a heatmap.
       </p>
-      <ul>
-        <li>TODO: key piece of the system.</li>
-        <li>TODO: key piece of the system.</li>
-        <li>TODO: key piece of the system.</li>
-      </ul>
 
-      <h2>Decisions and tradeoffs</h2>
+      <h2>Challenges</h2>
       <p>
-        TODO: this is the section that separates this site from every other new
-        grad portfolio. Pick one or two real forks in the road — a data model, a
-        sync strategy, build vs. buy — and explain what you chose, what you gave
-        up, and whether you'd choose it again.
+        The main issue facing this project was time. There were a high volume of farmers in the system,
+        and the calculation for each individual farmer was fairly time-consuming. This meant running the
+        full calculation every time the frontend sent a request would take a glacial amount of time.
+        In response, I implemented two
+        methods to speed up the user-experienced latency. First, I only ran the calculations on farmers
+        nearby a user's elevators, using a convex hull with a buffered perimeter to determine candidate farmers.
+        This meant that the only farmers on which the bid optimizer was run were those that were most likely to be
+        affected by a change in bid.
+        Second, I implemented a caching system to store
+        the results of calculations for given parameters. At this point in the codebase's history, there was no
+        existing caching system that I could fall back on; I had to build the first prototype myself. 
+        I used a hashmap to store results whenever a request with a set of parameters not matching anything in the cache
+        was run, meaning duplicate requests would pull from the cache instead of performing the expensive optimization
+        calculations. These design decisions helped to take
+        a lot of strain off the backend and decreased the amount of time a user would be left waiting
+        for calculations to finish.
       </p>
 
-      <h3>TODO: name the decision</h3>
-      <p>TODO: the options, the constraint that decided it, the cost you accepted.</p>
-
-      <h2>Hard parts</h2>
+      <h2>What I learned</h2>
       <p>
-        TODO: the thing that took three tries. Be honest about it — interviewers
-        ask about this section more than any other.
+        I completed Project Ghostbusters in under a week, and while my initial implementations weren't
+        perfect, I was able to expand on my initial design and incorporate fixes for the slow initial behavior. I iterated on
+        my first code, built a backend-heavy feature from scratch, and created a prototypical caching system that wasn't
+        present in the codebase previously. Overall, my work on this project solidified my ability to build solid, functional
+        features from scratch in the matter of a few days.
       </p>
-
-      <h2>Outcome</h2>
-      <p>
-        TODO: what changed once it shipped. Numbers if they're shareable; if not,
-        describe the before/after qualitatively. Also: is it still in production?
-        How many people use it?
-      </p>
-
-      <h2>What I'd do differently</h2>
-      <p>TODO: one honest paragraph. Shows judgment and growth.</p>
 
     </div>
 
     <nav class="pj-nav">
       <a href="project-qqq.html">← Project QQQ</a>
-      <a href="market-share-analysis.html">Market Share Analysis →</a>
+      <a href="positions-report.html">Positions Report →</a>
     </nav>
 
   </div>
